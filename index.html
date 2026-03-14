@@ -1,15 +1,204 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja" prefix="og: https://ogp.me/ns#">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deminer</title>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SEO & GEO — update the canonical URL before deploying
+       ═══════════════════════════════════════════════════════ -->
+
+  <!-- Primary -->
+  <title>たいこ地雷 | Taiko Minesweeper | マインスイーパー 太鼓の達人</title>
+  <meta name="description"
+        content="Play Taiko Minesweeper free in your browser! Minesweeper with Taiko no Tatsujin (太鼓の達人) animations, Don-chan mascot, DON/KATSU effects &amp; taiko drum sounds. Free — no download. マインスイーパー無料 · Démineur Taiko gratuit · Buscaminas Taiko gratis · 太鼓扫雷 · 타이코 지뢰찾기">
+  <meta name="keywords"
+        content="minesweeper, taiko, taiko no tatsujin, 太鼓の達人, マインスイーパー, たいこ地雷, démineur, buscaminas, campo minado, 扫雷, 지뢰찾기, mine sweeper, free browser game, puzzle game, don-chan, taiko drum game, online minesweeper">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="author" content="たいこ地雷">
+  <link rel="canonical" href="https://taiko-minesweeper.com/">
+
+  <!-- hreflang — same URL serves all languages (SPA) -->
+  <link rel="alternate" hreflang="x-default" href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="ja"         href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="en"         href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="fr"         href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="es"         href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="pt"         href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="de"         href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="ko"         href="https://taiko-minesweeper.com/">
+  <link rel="alternate" hreflang="zh-Hans"    href="https://taiko-minesweeper.com/">
+
+  <!-- Open Graph -->
+  <meta property="og:type"              content="website">
+  <meta property="og:title"             content="たいこ地雷 | Taiko Minesweeper">
+  <meta property="og:description"       content="Free Taiko no Tatsujin–style Minesweeper with Don-chan animations, DON/KATSU effects and taiko drum sounds. Play now — no download needed!">
+  <meta property="og:image"             content="https://taiko-minesweeper.com/taiko_banner_v3.gif">
+  <meta property="og:image:alt"         content="たいこ地雷 — Taiko Minesweeper banner with Don-chan characters">
+  <meta property="og:url"               content="https://taiko-minesweeper.com/">
+  <meta property="og:site_name"         content="たいこ地雷">
+  <meta property="og:locale"            content="ja_JP">
+  <meta property="og:locale:alternate"  content="en_US">
+  <meta property="og:locale:alternate"  content="fr_FR">
+  <meta property="og:locale:alternate"  content="es_ES">
+  <meta property="og:locale:alternate"  content="pt_BR">
+  <meta property="og:locale:alternate"  content="de_DE">
+  <meta property="og:locale:alternate"  content="ko_KR">
+  <meta property="og:locale:alternate"  content="zh_CN">
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="たいこ地雷 | Taiko Minesweeper">
+  <meta name="twitter:description" content="Free Taiko no Tatsujin–style Minesweeper. DON! KATSU! Play now 🥁">
+  <meta name="twitter:image"       content="https://taiko-minesweeper.com/taiko_banner_v3.gif">
+
+  <!-- JSON-LD — Structured data for Search & GEO (AI-powered search engines) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["VideoGame", "WebApplication"],
+        "@id": "https://taiko-minesweeper.com/#game",
+        "name": "たいこ地雷",
+        "alternateName": [
+          "Taiko Minesweeper",
+          "Taiko no Tatsujin Minesweeper",
+          "マインスイーパー 太鼓の達人",
+          "Démineur Taiko",
+          "Buscaminas Taiko",
+          "Campo Minato Taiko",
+          "Taiko Minenräumer",
+          "태고 지뢰찾기",
+          "太鼓扫雷"
+        ],
+        "description": "A free browser-based Minesweeper game inspired by Taiko no Tatsujin (太鼓の達人). Features the Don-chan mascot with bounce and celebration animations, DON (red circle) and KATSU (blue circle) hit effects, taiko drum sound effects, background music, and classic minesweeper gameplay on Easy (9×9), Medium (16×16), and Hard (30×16) difficulty levels. Fully playable on mobile and desktop with a dedicated flag mode for touchscreens.",
+        "inLanguage": ["ja", "en", "fr", "es", "pt", "de", "ko", "zh-Hans"],
+        "url": "https://taiko-minesweeper.com/",
+        "image": "https://taiko-minesweeper.com/taiko_banner_v3.gif",
+        "genre": ["Puzzle", "Strategy", "Arcade"],
+        "gamePlatform": "Web Browser",
+        "operatingSystem": "Any",
+        "applicationCategory": "Game",
+        "applicationSubCategory": "Puzzle Game",
+        "playMode": "SinglePlayer",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Taiko no Tatsujin visual theme",
+          "Don-chan mascot with animations",
+          "DON and KATSU ripple hit effects",
+          "Taiko drum sound effects via Web Audio API",
+          "Background music with mute control",
+          "Mobile responsive layout",
+          "Flag mode button for touchscreens",
+          "Easy / Medium / Hard difficulty",
+          "Win/loss statistics saved locally",
+          "No download or install required"
+        ],
+        "keywords": "minesweeper, taiko, taiko no tatsujin, マインスイーパー, 太鼓の達人, démineur, buscaminas, 扫雷, 지뢰찾기, free game, browser game"
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://taiko-minesweeper.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Taiko Minesweeper (たいこ地雷)?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Taiko Minesweeper (たいこ地雷) is a free browser game combining classic Minesweeper with the visual style of Taiko no Tatsujin (太鼓の達人). When you reveal cells, DON (red) and KATSU (blue) hit-circle animations appear along with taiko drum sounds. Don-chan, the taiko drum mascot, bounces on every move and celebrates when you win."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do you play Minesweeper?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Click or tap a cell to reveal it. Numbers show how many mines are adjacent. Right-click (or use the 🚩 flag button on mobile) to flag a suspected mine. Reveal all safe cells without hitting a mine to win. The first click is always safe."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "マインスイーパーの遊び方は？ (How to play in Japanese)",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "セルをクリックまたはタップして開きます。数字は隣接する地雷の数を示します。右クリック（モバイルでは🚩フラグボタン）で地雷のあるセルにフラグを立てます。地雷を踏まずにすべての安全なセルを開くと勝利です。最初のクリックは必ず安全です。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Comment jouer au Démineur Taiko ? (How to play in French)",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Cliquez sur une case pour la révéler. Les chiffres indiquent combien de mines sont adjacentes. Clic droit (ou bouton 🚩 sur mobile) pour poser un drapeau sur une mine suspecte. Révélez toutes les cases sûres sans déclencher de mine pour gagner."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cómo se juega al Buscaminas Taiko? (How to play in Spanish)",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Haz clic en una celda para revelarla. Los números muestran cuántas minas hay adyacentes. Clic derecho (o botón 🚩 en móvil) para marcar una mina sospechosa. Revela todas las celdas seguras sin pisar una mina para ganar."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "扫雷怎么玩？(How to play in Chinese)",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "点击格子来揭开它。数字表示相邻的地雷数量。右键点击（移动端用🚩按钮）来标记可疑地雷。在不踩到地雷的情况下揭开所有安全格子即可获胜。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "지뢰찾기 하는 방법은? (How to play in Korean)",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "셀을 클릭하거나 탭하여 열어보세요. 숫자는 인접한 지뢰의 수를 나타냅니다. 우클릭(모바일에서는 🚩 버튼)으로 의심되는 지뢰에 깃발을 꽂으세요. 지뢰를 밟지 않고 모든 안전한 칸을 열면 승리합니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie spielt man Minesweeper Taiko? (How to play in German)",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Klicke auf ein Feld, um es aufzudecken. Zahlen zeigen an, wie viele Minen benachbart sind. Rechtsklick (oder 🚩-Schaltfläche auf Mobilgeräten) zum Markieren einer verdächtigen Mine. Decke alle sicheren Felder auf, ohne eine Mine auszulösen, um zu gewinnen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is Taiko no Tatsujin?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Taiko no Tatsujin (太鼓の達人, lit. 'Master of Taiko') is a popular rhythm arcade game series by Bandai Namco where players hit a taiko drum to the beat of music. The series is known for its cheerful mascot Don-chan (ドンちゃん), a round red taiko drum with a friendly face. This minesweeper game is a fan-made tribute using its visual and audio style."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I flag mines on mobile without right-clicking?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tap the 🚩 button in the HUD to toggle Flag Mode. When Flag Mode is ON (button highlighted), tapping any cell places or removes a flag instead of revealing it. Switch it back OFF to return to reveal mode. You can also long-press cells on most Android and iOS browsers to trigger a flag directly."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
   <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=UnifrakturMaguntia&family=Kosugi+Maru&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ── Default theme variables ── */
     :root {
+      --cell: 34px;
       --bg:           #1a1a2e;
       --bg-board:     #16213e;
       --bg-cell:      #0f3460;
@@ -235,24 +424,34 @@
     body.taiko #board { padding: 12px; gap: 4px; }
 
     .cell {
-      width: 34px;
-      height: 34px;
+      width: var(--cell);
+      height: var(--cell);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: calc(var(--cell) * 0.43);
       font-weight: bold;
       border-radius: var(--border-radius-cell);
       border: var(--cell-border);
       cursor: pointer;
       transition: background 0.08s;
       font-family: var(--font-body);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body.taiko .cell { transition: background 0.08s, transform 0.1s; }
 
     .cell.hidden { background: var(--bg-cell); }
-    .cell.hidden:hover { background: var(--bg-cell-hover); }
+
+    @media (hover: hover) {
+      .cell.hidden:hover { background: var(--bg-cell-hover); }
+      body.taiko .cell.hidden:hover {
+        background: radial-gradient(circle at 35% 30%, #ff8e8e, #e04040 70%);
+        transform: scale(1.12);
+        box-shadow: 0 5px 12px rgba(0,0,0,0.35);
+      }
+    }
 
     body.warhammer .cell.hidden {
       background: var(--bg-cell);
@@ -263,12 +462,6 @@
       background: radial-gradient(circle at 35% 30%, #ff6b6b, #c0392b 70%);
       box-shadow: 0 3px 8px rgba(0,0,0,0.3), inset 0 1px 4px rgba(255,180,150,0.35);
     }
-    body.taiko .cell.hidden:hover {
-      background: radial-gradient(circle at 35% 30%, #ff8e8e, #e04040 70%);
-      transform: scale(1.12);
-      box-shadow: 0 5px 12px rgba(0,0,0,0.35);
-    }
-
     .cell.revealed { background: var(--bg-revealed); cursor: default; }
 
     body.taiko .cell.revealed {
@@ -276,7 +469,7 @@
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
     }
 
-    .cell.flagged { background: var(--bg-cell); font-size: 1rem; }
+    .cell.flagged { background: var(--bg-cell); font-size: calc(var(--cell) * 0.52); }
 
     body.taiko .cell.flagged {
       background: radial-gradient(circle at 35% 30%, #74b9ff, #0984e3 70%);
@@ -363,6 +556,47 @@
 
     .stats-table td:first-child { color: var(--accent); font-weight: bold; }
     .stats-table td.best { color: var(--accent2); }
+
+    /* ── Board wrapper (enables horizontal scroll on small screens) ── */
+    #board-wrap {
+      overflow-x: auto;
+      overflow-y: visible;
+      max-width: 100%;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Flag-mode button active state ── */
+    #flag-mode-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* ── Responsive / Mobile ── */
+    @media (max-width: 520px) {
+      body { padding: 12px 8px; }
+
+      h1 { font-size: 1.8rem; margin-bottom: 12px; }
+      body.taiko h1 { font-size: 2rem; }
+
+      .don-chan-wrap { height: 44px; margin-bottom: 2px; }
+      .don-chan { width: 40px; height: 40px; }
+
+      .controls { gap: 6px; margin-bottom: 12px; }
+      .controls button { padding: 8px 10px; font-size: 0.78rem; }
+
+      .hud { gap: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+
+      #message { font-size: 0.95rem; height: 22px; margin-bottom: 8px; }
+      body.taiko #message { font-size: 1rem; }
+
+      #stats-panel { margin-top: 16px; }
+      #stats-panel h2 { font-size: 0.85rem; }
+      .stats-table { font-size: 0.7rem; }
+      .stats-table th, .stats-table td { padding: 3px 4px; }
+    }
 
     /* ── Taiko Animation Keyframes ── */
     @keyframes dc-bounce {
@@ -454,12 +688,36 @@
   <div class="hud">
     <div id="hud-mines">💣 <span id="mines-left">0</span></div>
     <div>⏱ <span id="timer">0</span>s</div>
+    <button class="theme-btn" id="flag-mode-btn" onclick="toggleFlagMode()" title="Flag mode">🚩</button>
     <button class="theme-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
     <button class="theme-btn" id="music-btn" onclick="toggleMusic()">🎵</button>
   </div>
 
   <div id="message"></div>
-  <div id="board"></div>
+  <div id="board-wrap">
+    <div id="board"></div>
+  </div>
+
+  <!-- Multilingual entity description for GEO / AI-powered search engines.
+       Semantically meaningful content; visually hidden from sighted users. -->
+  <section aria-label="About this game" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">
+    <h2 lang="en">Taiko Minesweeper — Free Online Game</h2>
+    <p lang="en">たいこ地雷 (Taiko Minesweeper) is a free browser minesweeper game with a Taiko no Tatsujin theme. Reveal cells, avoid mines, and enjoy DON and KATSU animations with every click. Play on Easy, Medium, or Hard. No download required.</p>
+    <h2 lang="ja">たいこ地雷 — 無料オンラインゲーム</h2>
+    <p lang="ja">たいこ地雷は、太鼓の達人スタイルのマインスイーパーゲームです。セルを開いて地雷を避け、ドン・カツのアニメーションとサウンドを楽しもう。かんたん・ふつう・むずかしいの3段階。ダウンロード不要で無料プレイ。</p>
+    <h2 lang="fr">Démineur Taiko — Jeu en ligne gratuit</h2>
+    <p lang="fr">たいこ地雷 est un jeu de démineur gratuit dans le style de Taiko no Tatsujin. Révélez les cases, évitez les mines et profitez des animations DON et KATSU. Trois niveaux de difficulté, jouable sur mobile et desktop, sans téléchargement.</p>
+    <h2 lang="es">Buscaminas Taiko — Juego gratuito en línea</h2>
+    <p lang="es">たいこ地雷 es un buscaminas gratuito inspirado en Taiko no Tatsujin. Revela casillas, evita las minas y disfruta de las animaciones y sonidos DON y KATSU. Tres dificultades, compatible con móvil, sin descargas.</p>
+    <h2 lang="pt">Campo Minado Taiko — Jogo online gratuito</h2>
+    <p lang="pt">たいこ地雷 é um jogo de campo minado gratuito no estilo Taiko no Tatsujin. Revele células, evite minas e aproveite os efeitos DON e KATSU. Três dificuldades, jogável no celular, sem download.</p>
+    <h2 lang="de">Minesweeper Taiko — Kostenloses Online-Spiel</h2>
+    <p lang="de">たいこ地雷 ist ein kostenloses Minesweeper-Spiel im Taiko-no-Tatsujin-Stil. Decken Sie Felder auf, vermeiden Sie Minen und genießen Sie DON- und KATSU-Animationen. Drei Schwierigkeitsgrade, mobilfreundlich, kein Download nötig.</p>
+    <h2 lang="ko">타이코 지뢰찾기 — 무료 온라인 게임</h2>
+    <p lang="ko">たいこ地雷는 태고의 달인 스타일의 무료 지뢰찾기 게임입니다. 칸을 열고 지뢰를 피하며 DON·KATSU 애니메이션을 즐기세요. 세 가지 난이도, 모바일 지원, 다운로드 불필요.</p>
+    <h2 lang="zh-Hans">太鼓扫雷 — 免费在线游戏</h2>
+    <p lang="zh-Hans">たいこ地雷是一款免费的浏览器扫雷游戏，采用太鼓达人风格。点击格子、躲避地雷，享受DON和KATSU动画效果与鼓声。三种难度，支持手机，无需下载。</p>
+  </section>
 
   <div id="stats-panel">
     <h2>Statistics <button onclick="resetStats()">Reset</button></h2>
@@ -515,6 +773,22 @@
     let grid, cols, rows, totalMines, flagCount, revealedCount, gameOver, firstClick;
     let timerInterval, seconds;
     let currentDifficulty = 'easy';
+    let flagMode = false;
+
+    function computeCellSize() {
+      const boardPad = (currentTheme === 'taiko' ? 12 : 8) * 2;
+      const gap      =  currentTheme === 'taiko' ? 4 : 2;
+      const bodyPad  =  window.innerWidth <= 520 ? 16 : 32;
+      const available = window.innerWidth - bodyPad - boardPad - gap * (cols - 1);
+      return Math.max(18, Math.min(40, Math.floor(available / cols)));
+    }
+
+    function toggleFlagMode() {
+      flagMode = !flagMode;
+      const btn = document.getElementById('flag-mode-btn');
+      btn.classList.toggle('active', flagMode);
+      btn.title = flagMode ? 'Flag mode ON — tap to flag' : 'Flag mode OFF — tap to reveal';
+    }
 
     function startGame(difficulty) {
       currentDifficulty = difficulty;
@@ -537,6 +811,11 @@
       document.getElementById('timer').textContent = '0';
       document.getElementById('message').textContent = '';
       document.getElementById('mines-left').textContent = totalMines;
+
+      // reset flag mode
+      flagMode = false;
+      const flagBtn = document.getElementById('flag-mode-btn');
+      flagBtn.classList.remove('active');
 
       // stop don-chan celebrate loop
       const don = document.getElementById('don-chan');
@@ -581,7 +860,9 @@
     function renderBoard() {
       const t = THEMES[currentTheme];
       const board = document.getElementById('board');
-      board.style.gridTemplateColumns = `repeat(${cols}, 34px)`;
+      const cellPx = computeCellSize();
+      board.style.setProperty('--cell', cellPx + 'px');
+      board.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
       board.innerHTML = '';
 
       for (let r = 0; r < rows; r++) {
@@ -624,6 +905,7 @@
     }
 
     function handleClick(r, c) {
+      if (flagMode) { handleFlag(r, c); return; }
       if (gameOver || grid[r][c].revealed || grid[r][c].flagged) return;
 
       if (firstClick) {
@@ -1128,6 +1410,13 @@
         case 'win':    tk ? sfxTaikoClear()  : wh ? sfxWarhammerWin()   : sfxWin();    break;
       }
     }
+    // Re-compute cell size on resize (e.g. orientation change)
+    let _resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(renderBoard, 150);
+    });
+
     // ── Background Music ──────────────────────────────────────────────────────
     const bgMusic = new Audio(`music/music${Math.floor(Math.random() * 4) + 1}.mp3`);
     bgMusic.loop = true;
