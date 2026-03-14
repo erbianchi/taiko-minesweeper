@@ -314,7 +314,6 @@
       align-items: center;
       justify-content: center;
       height: 56px;
-      margin-bottom: 4px;
     }
     body.taiko .don-chan-wrap { display: flex; }
 
@@ -328,6 +327,100 @@
     .don-chan.bounce   { animation: dc-bounce   0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
     .don-chan.scared   { animation: dc-scared   0.55s ease-out; }
     .don-chan.celebrate{ animation: dc-celebrate 0.7s ease-in-out infinite; }
+
+    /* ── Restart button (replaces combo bar on game over) ── */
+    #restart-btn {
+      display: none;
+      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #ffd700;
+      background: #e53935;
+      border: none;
+      border-radius: 12px;
+      padding: 4px 28px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 3px 3px 0 #8b0000, 0 0 14px rgba(229,57,53,0.5);
+      text-shadow: 1px 1px 0 #8b0000, -1px -1px 0 #8b0000;
+      margin-bottom: 10px;
+      animation: restart-pop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    }
+    #restart-btn:hover { background: #ff5252; box-shadow: 3px 3px 0 #8b0000, 0 0 20px rgba(229,57,53,0.9); }
+    @keyframes restart-pop {
+      0%   { transform: scale(0); opacity: 0; }
+      70%  { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    body.game-over #combo-bar  { display: none; }
+    body.game-over #restart-btn { display: block; }
+
+    /* ── Don-chan face animations ── */
+    @keyframes dc-blink {
+      0%, 88%, 100% { transform: scaleY(1); }
+      92%           { transform: scaleY(0.07); }
+      96%           { transform: scaleY(1); }
+    }
+    @keyframes dc-look {
+      0%,100% { transform: translate(0px,  0px); }
+      20%     { transform: translate(1px,  0px); }
+      50%     { transform: translate(0.5px,0.8px); }
+      75%     { transform: translate(-0.8px,0px); }
+    }
+
+    /* Eyes blink continuously */
+    .dc-eye {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: dc-blink 3.8s ease-in-out infinite;
+    }
+    .dc-eye-r { animation-delay: 0.05s; }
+
+    /* Pupils drift lazily */
+    .dc-pupil {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: dc-look 6s ease-in-out infinite;
+    }
+    .dc-pupil-r { animation-delay: -2s; }
+    .dc-shine {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    /* Eyebrows: only one set visible at a time */
+    .dc-brow { stroke: #b71c1c; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+    .dc-brow-scared, .dc-brow-happy { display: none; }
+
+    /* Mouths: only one visible at a time */
+    .dc-mouth { display: none; }
+    .dc-mouth-default { display: block; }
+
+    /* ── bounce: happy squint ── */
+    .don-chan.bounce .dc-eye    { transform: scaleY(0.35); animation: none; }
+    .don-chan.bounce .dc-pupil  { transform: translateY(-1.5px); animation: none; }
+    .don-chan.bounce .dc-shine  { transform: translateY(-1.5px); }
+    .don-chan.bounce .dc-mouth-default  { display: none; }
+    .don-chan.bounce .dc-mouth-bounce   { display: block; }
+    .don-chan.bounce .dc-brow-normal    { display: none; }
+    .don-chan.bounce .dc-brow-happy     { display: block; }
+
+    /* ── scared: wide eyes, open mouth ── */
+    .don-chan.scared .dc-eye    { transform: scaleY(1.25) scaleX(1.05); animation: none; }
+    .don-chan.scared .dc-pupil  { transform: scale(0.7); animation: none; }
+    .don-chan.scared .dc-mouth-default  { display: none; }
+    .don-chan.scared .dc-mouth-scared   { display: block; }
+    .don-chan.scared .dc-brow-normal    { display: none; }
+    .don-chan.scared .dc-brow-scared    { display: block; }
+
+    /* ── celebrate: crescent squint, big smile ── */
+    .don-chan.celebrate .dc-eye    { transform: scaleY(0.12); animation: none; }
+    .don-chan.celebrate .dc-pupil  { opacity: 0; animation: none; }
+    .don-chan.celebrate .dc-shine  { opacity: 0; }
+    .don-chan.celebrate .dc-mouth-default   { display: none; }
+    .don-chan.celebrate .dc-mouth-celebrate { display: block; }
+    .don-chan.celebrate .dc-brow-normal     { display: none; }
+    .don-chan.celebrate .dc-brow-happy      { display: block; }
 
     .theme-btn {
       padding: 5px 14px;
@@ -346,50 +439,86 @@
       color: var(--bg);
     }
 
-    .controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .controls button {
-      padding: 8px 18px;
-      border: 2px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      border-radius: var(--border-radius-cell);
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-family: var(--font-body);
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .controls button:hover,
-    .controls button.active {
-      background: var(--accent);
-      color: var(--bg);
-    }
-
-    body.warhammer .controls button {
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.8rem;
-    }
-
-    body.taiko .controls button { border-radius: 20px; font-weight: bold; }
-
-    .hud {
-      display: flex;
-      gap: 32px;
-      margin-bottom: 16px;
-      font-size: 1.1rem;
-      font-variant-numeric: tabular-nums;
+    /* ── Header row: [diff-left] [don-chan] [util-btns] ── */
+    #header-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 10px;
+      opacity: 0.65;
+      transition: opacity 0.25s;
+    }
+    #header-row:hover { opacity: 1; }
+
+    #diff-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      justify-self: start;
     }
 
-    .hud span { color: var(--accent); font-weight: bold; }
+    #header-row #util-btns {
+      justify-self: end;
+    }
+
+    .restart-btn {
+      padding: 5px 11px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.65);
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: var(--font-body);
+      font-weight: bold;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .restart-btn:hover { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.35); }
+
+    #util-btns {
+      display: flex;
+      gap: 5px;
+    }
+    #util-btns button {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: rgba(0,0,0,0.22);
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s, background 0.15s;
+      font-family: var(--font-body);
+    }
+    #util-btns button:hover { background: rgba(255,255,255,0.18); }
+    #util-btns button.active { background: var(--accent); color: var(--bg); }
+
+    /* ── Score HUD: mines | SCORE | timer ── */
+    #score-hud {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 10px;
+    }
+    .hud-stat {
+      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.65);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .hud-stat span { color: #ffd700; }
+    .hud-stat.right { justify-self: end; }
 
     #message {
       height: 28px;
@@ -586,13 +715,12 @@
       h1 { font-size: 1.8rem; margin-bottom: 12px; }
       body.taiko h1 { font-size: 2rem; }
 
-      .don-chan-wrap { height: 44px; margin-bottom: 2px; }
+      .don-chan-wrap { height: 44px; }
       .don-chan { width: 40px; height: 40px; }
 
-      .controls { gap: 6px; margin-bottom: 12px; }
-      .controls button { padding: 8px 10px; font-size: 0.78rem; }
-
-      .hud { gap: 10px; margin-bottom: 10px; font-size: 0.9rem; }
+      #header-row { margin-bottom: 8px; }
+      .restart-btn { padding: 3px 8px; font-size: 0.62rem; }
+      .hud-stat { font-size: 0.85rem; min-width: 60px; }
 
       #message { font-size: 0.95rem; height: 22px; margin-bottom: 8px; }
       body.taiko #message { font-size: 1rem; }
@@ -713,10 +841,9 @@
     /* ── Total score display ── */
     #total-score-wrap {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      flex: 1;
     }
     #total-score-label {
       font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
@@ -881,45 +1008,60 @@
 <body class="taiko">
   <h1 id="title">たいこ地雷</h1>
 
-  <!-- Don-chan mascot -->
-  <div class="don-chan-wrap">
-    <svg id="don-chan" class="don-chan" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-      <!-- Body -->
-      <circle cx="30" cy="33" r="24" fill="#e53935" stroke="#b71c1c" stroke-width="1.5"/>
-      <!-- Hat band -->
-      <rect x="6" y="20" width="48" height="7" rx="3.5" fill="#b71c1c"/>
-      <!-- Face -->
-      <circle cx="20" cy="31" r="5"   fill="white"/>
-      <circle cx="40" cy="31" r="5"   fill="white"/>
-      <circle cx="21.5" cy="32" r="2.5" fill="#212121"/>
-      <circle cx="41.5" cy="32" r="2.5" fill="#212121"/>
-      <circle cx="22.5" cy="30.5" r="1" fill="white"/>
-      <circle cx="42.5" cy="30.5" r="1" fill="white"/>
-      <path d="M 18 39 Q 30 49 42 39" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <!-- Cheeks -->
-      <circle cx="11" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
-      <circle cx="49" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
-    </svg>
+  <!-- Header row: [↺ Easy][↺ Med][↺ Hard]  [don-chan]  [🚩][🔊][🎵] -->
+  <div id="header-row">
+    <div id="diff-left">
+      <button id="btn-easy"   class="restart-btn" onclick="startGame('easy')">↺ Easy</button>
+      <button id="btn-medium" class="restart-btn" onclick="startGame('medium')">↺ Med</button>
+      <button id="btn-hard"   class="restart-btn" onclick="startGame('hard')">↺ Hard</button>
+    </div>
+    <div class="don-chan-wrap">
+      <svg id="don-chan" class="don-chan" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+        <!-- Body -->
+        <circle cx="30" cy="33" r="24" fill="#e53935" stroke="#b71c1c" stroke-width="1.5"/>
+        <!-- Hat band -->
+        <rect x="6" y="20" width="48" height="7" rx="3.5" fill="#b71c1c"/>
+        <!-- Eyebrows -->
+        <path class="dc-brow dc-brow-normal dc-brow-l" d="M 14 26 Q 20 23 26 25"/>
+        <path class="dc-brow dc-brow-normal dc-brow-r" d="M 34 25 Q 40 23 46 26"/>
+        <path class="dc-brow dc-brow-scared dc-brow-l" d="M 14 23 Q 20 27 26 26"/>
+        <path class="dc-brow dc-brow-scared dc-brow-r" d="M 34 26 Q 40 27 46 23"/>
+        <path class="dc-brow dc-brow-happy  dc-brow-l" d="M 14 24 Q 20 20 26 22"/>
+        <path class="dc-brow dc-brow-happy  dc-brow-r" d="M 34 22 Q 40 20 46 24"/>
+        <!-- Eye whites -->
+        <circle class="dc-eye dc-eye-l" cx="20" cy="31" r="5"   fill="white"/>
+        <circle class="dc-eye dc-eye-r" cx="40" cy="31" r="5"   fill="white"/>
+        <!-- Pupils -->
+        <circle class="dc-pupil dc-pupil-l" cx="21.5" cy="32" r="2.5" fill="#212121"/>
+        <circle class="dc-pupil dc-pupil-r" cx="41.5" cy="32" r="2.5" fill="#212121"/>
+        <!-- Eye shine -->
+        <circle class="dc-shine" cx="22.5" cy="30.5" r="1" fill="white"/>
+        <circle class="dc-shine" cx="42.5" cy="30.5" r="1" fill="white"/>
+        <!-- Cheeks -->
+        <circle cx="11" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
+        <circle cx="49" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
+        <!-- Mouths -->
+        <path class="dc-mouth dc-mouth-default"   d="M 18 39 Q 30 49 42 39"   stroke="white" stroke-width="3"   fill="none" stroke-linecap="round"/>
+        <path class="dc-mouth dc-mouth-bounce"    d="M 16 38 Q 30 51 44 38"   stroke="white" stroke-width="3"   fill="none" stroke-linecap="round"/>
+        <path class="dc-mouth dc-mouth-celebrate" d="M 14 37 Q 30 53 46 37"   stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <ellipse class="dc-mouth dc-mouth-scared" cx="30" cy="41" rx="5" ry="4" fill="#212121" stroke="white" stroke-width="1"/>
+      </svg>
+    </div>
+    <div id="util-btns">
+      <button id="flag-mode-btn" onclick="toggleFlagMode()" title="Flag mode">🚩</button>
+      <button id="mute-btn" onclick="toggleMute()">🔊</button>
+      <button id="music-btn" onclick="toggleMusic()">🎵</button>
+    </div>
   </div>
 
-  <div class="controls">
-    <button id="btn-easy"   onclick="startGame('easy')">Easy (9×9)</button>
-    <button id="btn-medium" onclick="startGame('medium')">Medium (16×16)</button>
-    <button id="btn-hard"   onclick="startGame('hard')">Hard (30×16)</button>
-    <button onclick="startGame(currentDifficulty)">Restart</button>
-  </div>
-
-  <div class="hud">
-    <div id="hud-mines">💣 <span id="mines-left">0</span></div>
-    <div>⏱ <span id="timer">0</span>s</div>
-    <button class="theme-btn" id="flag-mode-btn" onclick="toggleFlagMode()" title="Flag mode">🚩</button>
-    <button class="theme-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
-    <button class="theme-btn" id="music-btn" onclick="toggleMusic()">🎵</button>
-  </div>
-
-  <div id="total-score-wrap">
-    <span id="total-score-label">SCORE</span>
-    <span id="total-score">0</span>
+  <!-- Score HUD: mines | SCORE | timer -->
+  <div id="score-hud">
+    <div class="hud-stat">💣 <span id="mines-left">0</span></div>
+    <div id="total-score-wrap">
+      <span id="total-score-label">SCORE</span>
+      <span id="total-score">0</span>
+    </div>
+    <div class="hud-stat right">⏱ <span id="timer">0</span>s</div>
   </div>
   <div id="combo-bar">
     <span id="combo-count">0 combo</span>
@@ -927,6 +1069,7 @@
     <div id="energy-bar-wrap"><div id="energy-bar"></div></div>
     <span id="combo-score">+0</span>
   </div>
+  <button id="restart-btn" onclick="startGame(currentDifficulty)">RESTART</button>
   <div id="mini-run-bar">
     <span id="mini-run-label">🥁 ×2</span>
     <div id="mini-run-steps"></div>
@@ -1323,14 +1466,11 @@
 
     function startGame(difficulty) {
       currentDifficulty = difficulty;
+      document.body.classList.remove('game-over');
       const cfg = DIFFICULTIES[difficulty];
       cols = cfg.cols;
       rows = cfg.rows;
       totalMines = cfg.mines;
-
-      document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
-      const btn = document.getElementById('btn-' + difficulty);
-      if (btn) btn.classList.add('active');
 
       flagCount = 0;
       revealedCount = 0;
@@ -1530,6 +1670,7 @@
     function endGame(won, hitR, hitC) {
       gameOver = true;
       clearInterval(timerInterval);
+      document.body.classList.add('game-over');
 
       for (let r = 0; r < rows; r++)
         for (let c = 0; c < cols; c++) {
