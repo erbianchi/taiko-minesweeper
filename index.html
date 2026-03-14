@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deminer</title>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=UnifrakturMaguntia&family=Kosugi+Maru&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Default theme variables ── */
+    :root {
+      --bg:           #1a1a2e;
+      --bg-board:     #16213e;
+      --bg-cell:      #0f3460;
+      --bg-cell-hover:#1a4a80;
+      --bg-revealed:  #0a1628;
+      --bg-mine-hit:  #e94560;
+      --bg-mine-rev:  #1a1a2e;
+      --accent:       #e94560;
+      --accent2:      #f5c518;
+      --text:         #eee;
+      --border-radius-board: 8px;
+      --border-radius-cell:  4px;
+      --board-border: none;
+      --cell-border:  none;
+      --font-body:    'Segoe UI', sans-serif;
+      --font-title:   'Segoe UI', sans-serif;
+      --title-shadow: none;
+      --board-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      --n1: #58a6ff; --n2: #3fb950; --n3: #f85149; --n4: #8b5cf6;
+      --n5: #f0883e; --n6: #56d364; --n7: #e94560; --n8: #8b949e;
+    }
+
+    /* ── Warhammer theme variables ── */
+    body.warhammer {
+      --bg:           #1a0f06;
+      --bg-board:     #2a1a08;
+      --bg-cell:      #3b2510;
+      --bg-cell-hover:#52341a;
+      --bg-revealed:  #1e1208;
+      --bg-mine-hit:  #7a0a00;
+      --bg-mine-rev:  #1a0f06;
+      --accent:       #c8922a;
+      --accent2:      #e8c060;
+      --text:         #e8d5a0;
+      --border-radius-board: 2px;
+      --border-radius-cell:  1px;
+      --board-border: 3px solid #7a5520;
+      --cell-border:  1px solid #5a3a10;
+      --font-body:    Georgia, 'Times New Roman', serif;
+      --font-title:   'UnifrakturMaguntia', 'MedievalSharp', cursive;
+      --title-shadow: 2px 2px 8px rgba(200,100,0,0.7), 0 0 20px rgba(200,80,0,0.4);
+      --board-shadow: 0 6px 32px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.4);
+      --n1: #d4a84b; --n2: #8fbc6a; --n3: #cc4422; --n4: #9966cc;
+      --n5: #dd7722; --n6: #44aa66; --n7: #cc2200; --n8: #997755;
+    }
+
+    /* ── Taiko theme variables ── */
+    body.taiko {
+      --bg:           #ff7a00;
+      --bg-board:     #fffaf0;
+      --bg-cell:      #d63031;
+      --bg-cell-hover:#e84646;
+      --bg-revealed:  #fff9e6;
+      --bg-mine-hit:  #c0392b;
+      --bg-mine-rev:  #fdecea;
+      --accent:       #ffd700;
+      --accent2:      #ffffff;
+      --text:         #2d0000;
+      --border-radius-board: 20px;
+      --border-radius-cell:  50%;
+      --board-border: 4px solid #ffd700;
+      --cell-border:  2px solid rgba(0,0,0,0.12);
+      --font-body:    'Kosugi Maru', 'Arial Rounded MT Bold', sans-serif;
+      --font-title:   'Kosugi Maru', 'Arial Rounded MT Bold', sans-serif;
+      --title-shadow: 3px 3px 0 #8b0000, -1px -1px 0 #8b0000;
+      --board-shadow: 0 8px 40px rgba(200,50,0,0.5), 0 0 0 5px #ffd700, 0 0 0 9px #e53935;
+      --n1: #1565c0; --n2: #2e7d32; --n3: #c62828; --n4: #6a1b9a;
+      --n5: #e65100; --n6: #00695c; --n7: #ad1457; --n8: #37474f;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.warhammer {
+      background-image:
+        radial-gradient(ellipse at top, #2d1500 0%, #1a0f06 60%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    body.taiko {
+      background: linear-gradient(150deg, #ffb74d 0%, #ff6d00 45%, #e64a19 100%);
+      background-attachment: fixed;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+      color: var(--accent);
+      font-family: var(--font-title);
+      text-shadow: var(--title-shadow);
+      transition: all 0.3s;
+    }
+
+    body.warhammer h1::before { content: '☩ '; }
+    body.warhammer h1::after  { content: ' ☩'; }
+    body.taiko h1 { color: #fff; font-size: 3rem; letter-spacing: 0.2em; }
+    body.taiko h1::before { content: '🥁 '; }
+    body.taiko h1::after  { content: ' 🥁'; }
+
+    /* ── Don-chan mascot ── */
+    .don-chan-wrap {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 56px;
+      margin-bottom: 4px;
+    }
+    body.taiko .don-chan-wrap { display: flex; }
+
+    .don-chan {
+      width: 52px;
+      height: 52px;
+      transform-origin: bottom center;
+      cursor: default;
+      user-select: none;
+    }
+    .don-chan.bounce   { animation: dc-bounce   0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+    .don-chan.scared   { animation: dc-scared   0.55s ease-out; }
+    .don-chan.celebrate{ animation: dc-celebrate 0.7s ease-in-out infinite; }
+
+    .theme-btn {
+      padding: 5px 14px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: var(--font-body);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .theme-btn:hover, .theme-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .controls button {
+      padding: 8px 18px;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      border-radius: var(--border-radius-cell);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: var(--font-body);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .controls button:hover,
+    .controls button.active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    body.warhammer .controls button {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+    }
+
+    body.taiko .controls button { border-radius: 20px; font-weight: bold; }
+
+    .hud {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 16px;
+      font-size: 1.1rem;
+      font-variant-numeric: tabular-nums;
+      align-items: center;
+    }
+
+    .hud span { color: var(--accent); font-weight: bold; }
+
+    #message {
+      height: 28px;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      font-weight: bold;
+      color: var(--accent2);
+      font-family: var(--font-body);
+    }
+
+    body.warhammer #message { font-style: italic; letter-spacing: 0.05em; }
+    body.taiko #message { font-size: 1.3rem; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
+
+    #board {
+      display: inline-grid;
+      gap: 2px;
+      background: var(--bg-board);
+      padding: 8px;
+      border-radius: var(--border-radius-board);
+      border: var(--board-border);
+      box-shadow: var(--board-shadow);
+      user-select: none;
+      transition: all 0.3s;
+    }
+
+    body.warhammer #board {
+      padding: 10px;
+      outline: 2px solid #4a2a05;
+      outline-offset: 3px;
+    }
+
+    body.taiko #board { padding: 12px; gap: 4px; }
+
+    .cell {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border-radius: var(--border-radius-cell);
+      border: var(--cell-border);
+      cursor: pointer;
+      transition: background 0.08s;
+      font-family: var(--font-body);
+    }
+
+    body.taiko .cell { transition: background 0.08s, transform 0.1s; }
+
+    .cell.hidden { background: var(--bg-cell); }
+    .cell.hidden:hover { background: var(--bg-cell-hover); }
+
+    body.warhammer .cell.hidden {
+      background: var(--bg-cell);
+      background-image: linear-gradient(135deg, rgba(255,200,100,0.04) 0%, transparent 50%);
+    }
+
+    body.taiko .cell.hidden {
+      background: radial-gradient(circle at 35% 30%, #ff6b6b, #c0392b 70%);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3), inset 0 1px 4px rgba(255,180,150,0.35);
+    }
+    body.taiko .cell.hidden:hover {
+      background: radial-gradient(circle at 35% 30%, #ff8e8e, #e04040 70%);
+      transform: scale(1.12);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.35);
+    }
+
+    .cell.revealed { background: var(--bg-revealed); cursor: default; }
+
+    body.taiko .cell.revealed {
+      background: radial-gradient(circle at 35% 30%, #fffde7, #fff9c4 70%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    .cell.flagged { background: var(--bg-cell); font-size: 1rem; }
+
+    body.taiko .cell.flagged {
+      background: radial-gradient(circle at 35% 30%, #74b9ff, #0984e3 70%);
+      box-shadow: 0 3px 8px rgba(9,132,227,0.4), inset 0 1px 4px rgba(180,220,255,0.4);
+    }
+
+    .cell.mine-hit { background: var(--bg-mine-hit); }
+
+    body.taiko .cell.mine-hit {
+      background: radial-gradient(circle at 35% 30%, #ff7675, #d63031 70%);
+      box-shadow: 0 0 20px rgba(214,48,49,0.8) !important;
+    }
+
+    .cell.mine-revealed { background: var(--bg-mine-rev); cursor: default; }
+
+    body.taiko .cell.mine-revealed {
+      background: radial-gradient(circle at 35% 30%, #ffe0e0, #ffb3b3 70%);
+    }
+
+    .n1 { color: var(--n1); }
+    .n2 { color: var(--n2); }
+    .n3 { color: var(--n3); }
+    .n4 { color: var(--n4); }
+    .n5 { color: var(--n5); }
+    .n6 { color: var(--n6); }
+    .n7 { color: var(--n7); }
+    .n8 { color: var(--n8); }
+
+    /* ── Stats panel ── */
+    #stats-panel {
+      margin-top: 28px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    #stats-panel h2 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #stats-panel h2 button {
+      font-size: 0.7rem;
+      padding: 2px 10px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      opacity: 0.6;
+    }
+    #stats-panel h2 button:hover { opacity: 1; }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .stats-table th {
+      color: var(--accent);
+      text-align: left;
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--accent);
+      opacity: 0.7;
+      font-weight: normal;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+    }
+
+    .stats-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .stats-table td:first-child { color: var(--accent); font-weight: bold; }
+    .stats-table td.best { color: var(--accent2); }
+
+    /* ── Taiko Animation Keyframes ── */
+    @keyframes dc-bounce {
+      0%   { transform: scale(1,   1  ) translateY(0);    }
+      20%  { transform: scale(1.2, 0.8) translateY(6px);  }
+      50%  { transform: scale(0.9, 1.2) translateY(-18px);}
+      75%  { transform: scale(1.1, 0.9) translateY(4px);  }
+      100% { transform: scale(1,   1  ) translateY(0);    }
+    }
+    @keyframes dc-scared {
+      0%,100%{ transform: scale(1)    rotate(0deg);   }
+      15%    { transform: scale(1.3)  rotate(-12deg); }
+      30%    { transform: scale(0.9)  rotate( 12deg); }
+      50%    { transform: scale(1.1)  rotate(-8deg);  }
+      70%    { transform: scale(0.95) rotate( 6deg);  }
+      85%    { transform: scale(1.05) rotate(-3deg);  }
+    }
+    @keyframes dc-celebrate {
+      0%,100%{ transform: scale(1)   translateY(0)    rotate(-6deg); }
+      50%    { transform: scale(1.2) translateY(-14px) rotate(6deg); }
+    }
+    @keyframes tk-ripple {
+      0%   { transform: translate(-50%,-50%) scale(0);   opacity: 0.85; }
+      100% { transform: translate(-50%,-50%) scale(5.5); opacity: 0;    }
+    }
+    @keyframes tk-popup {
+      0%   { transform: translate(-50%,  0px) scale(0.2); opacity: 1; }
+      25%  { transform: translate(-50%, -12px) scale(1.5); opacity: 1; }
+      65%  { transform: translate(-50%, -38px) scale(1.1); opacity: 1; }
+      100% { transform: translate(-50%, -70px) scale(0.8); opacity: 0; }
+    }
+    @keyframes tk-shake {
+      0%,100%{ transform: translate(0,0) rotate(0deg); }
+      10%    { transform: translate(-10px,-2px) rotate(-1.5deg); }
+      20%    { transform: translate( 10px, 2px) rotate( 1.5deg); }
+      30%    { transform: translate(-8px,  0)   rotate(-1deg);   }
+      40%    { transform: translate( 8px,  0)   rotate( 1deg);   }
+      50%    { transform: translate(-5px,  1px); }
+      60%    { transform: translate( 5px, -1px); }
+      70%    { transform: translate(-3px,  0); }
+      80%    { transform: translate( 3px,  0); }
+      90%    { transform: translate(-1px,  0); }
+    }
+    @keyframes tk-flash {
+      0%,100%{ opacity: 0;    }
+      25%    { opacity: 0.55; }
+      60%    { opacity: 0.2;  }
+    }
+    @keyframes tk-banner {
+      0%  { transform: translate(-50%,-50%) scale(0.1) rotate(-15deg); opacity: 0; }
+      55% { transform: translate(-50%,-50%) scale(1.25) rotate(4deg);  opacity: 1; }
+      75% { transform: translate(-50%,-50%) scale(0.95) rotate(-1deg); opacity: 1; }
+      88% { transform: translate(-50%,-50%) scale(1)    rotate(0deg);  opacity: 1; }
+      100%{ transform: translate(-50%,-50%) scale(2)    rotate(0deg);  opacity: 0; }
+    }
+  </style>
+</head>
+<body class="taiko">
+  <h1 id="title">たいこ地雷</h1>
+
+  <!-- Don-chan mascot -->
+  <div class="don-chan-wrap">
+    <svg id="don-chan" class="don-chan" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <!-- Body -->
+      <circle cx="30" cy="33" r="24" fill="#e53935" stroke="#b71c1c" stroke-width="1.5"/>
+      <!-- Hat band -->
+      <rect x="6" y="20" width="48" height="7" rx="3.5" fill="#b71c1c"/>
+      <!-- Face -->
+      <circle cx="20" cy="31" r="5"   fill="white"/>
+      <circle cx="40" cy="31" r="5"   fill="white"/>
+      <circle cx="21.5" cy="32" r="2.5" fill="#212121"/>
+      <circle cx="41.5" cy="32" r="2.5" fill="#212121"/>
+      <circle cx="22.5" cy="30.5" r="1" fill="white"/>
+      <circle cx="42.5" cy="30.5" r="1" fill="white"/>
+      <path d="M 18 39 Q 30 49 42 39" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- Cheeks -->
+      <circle cx="11" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
+      <circle cx="49" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
+    </svg>
+  </div>
+
+  <div class="controls">
+    <button id="btn-easy"   onclick="startGame('easy')">Easy (9×9)</button>
+    <button id="btn-medium" onclick="startGame('medium')">Medium (16×16)</button>
+    <button id="btn-hard"   onclick="startGame('hard')">Hard (30×16)</button>
+    <button onclick="startGame(currentDifficulty)">Restart</button>
+  </div>
+
+  <div class="hud">
+    <div id="hud-mines">💣 <span id="mines-left">0</span></div>
+    <div>⏱ <span id="timer">0</span>s</div>
+    <button class="theme-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
+    <button class="theme-btn" id="music-btn" onclick="toggleMusic()">🎵</button>
+  </div>
+
+  <div id="message"></div>
+  <div id="board"></div>
+
+  <div id="stats-panel">
+    <h2>Statistics <button onclick="resetStats()">Reset</button></h2>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>Difficulty</th>
+          <th>Played</th>
+          <th>Won</th>
+          <th>Win %</th>
+          <th>Best time</th>
+          <th>Streak</th>
+        </tr>
+      </thead>
+      <tbody id="stats-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const DIFFICULTIES = {
+      easy:   { cols: 9,  rows: 9,  mines: 10 },
+      medium: { cols: 16, rows: 16, mines: 40 },
+      hard:   { cols: 30, rows: 16, mines: 99 },
+    };
+
+    const COLORS = ['', 'n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8'];
+
+    const THEMES = {
+      default: {
+        mine: '💣', flag: '🚩',
+        title: 'DEMINER',
+        hudMine: '💣',
+        winMsg:  s => `You won in ${s}s! 🎉`,
+        loseMsg: () => 'Boom! Game over. 💥',
+      },
+      warhammer: {
+        mine: '☠', flag: '⚔',
+        title: 'Deminer',
+        hudMine: '☠',
+        winMsg:  s => `The Emperor protects! Cleared in ${s}s.`,
+        loseMsg: () => 'Suffer not the heretic to live… you failed.',
+      },
+      taiko: {
+        mine: '💣', flag: '🎵',
+        title: 'たいこ地雷',
+        hudMine: '💣',
+        winMsg:  s => `クリア！ ${s}秒でクリア！🎉`,
+        loseMsg: () => 'ドカーン！ ゲームオーバー！💥',
+      },
+    };
+
+    let currentTheme = 'taiko';
+    let grid, cols, rows, totalMines, flagCount, revealedCount, gameOver, firstClick;
+    let timerInterval, seconds;
+    let currentDifficulty = 'easy';
+
+    function startGame(difficulty) {
+      currentDifficulty = difficulty;
+      const cfg = DIFFICULTIES[difficulty];
+      cols = cfg.cols;
+      rows = cfg.rows;
+      totalMines = cfg.mines;
+
+      document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById('btn-' + difficulty);
+      if (btn) btn.classList.add('active');
+
+      flagCount = 0;
+      revealedCount = 0;
+      gameOver = false;
+      firstClick = true;
+      seconds = 0;
+
+      clearInterval(timerInterval);
+      document.getElementById('timer').textContent = '0';
+      document.getElementById('message').textContent = '';
+      document.getElementById('mines-left').textContent = totalMines;
+
+      // stop don-chan celebrate loop
+      const don = document.getElementById('don-chan');
+      don.classList.remove('bounce', 'scared', 'celebrate');
+
+      grid = Array.from({ length: rows }, () =>
+        Array.from({ length: cols }, () => ({
+          mine: false, revealed: false, flagged: false, adjacent: 0,
+        }))
+      );
+
+      renderBoard();
+    }
+
+    function placeMines(safeR, safeC) {
+      let placed = 0;
+      while (placed < totalMines) {
+        const r = Math.floor(Math.random() * rows);
+        const c = Math.floor(Math.random() * cols);
+        if (!grid[r][c].mine && !(Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1)) {
+          grid[r][c].mine = true;
+          placed++;
+        }
+      }
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++)
+          if (!grid[r][c].mine)
+            grid[r][c].adjacent = neighbors(r, c).filter(([nr, nc]) => grid[nr][nc].mine).length;
+    }
+
+    function neighbors(r, c) {
+      const result = [];
+      for (let dr = -1; dr <= 1; dr++)
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) result.push([nr, nc]);
+        }
+      return result;
+    }
+
+    function renderBoard() {
+      const t = THEMES[currentTheme];
+      const board = document.getElementById('board');
+      board.style.gridTemplateColumns = `repeat(${cols}, 34px)`;
+      board.innerHTML = '';
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          const d = grid[r][c];
+
+          if (d.revealed) {
+            if (d.mine) {
+              cell.classList.add('mine-revealed');
+              cell.textContent = t.mine;
+            } else {
+              cell.classList.add('revealed');
+              if (d.adjacent > 0) {
+                cell.textContent = d.adjacent;
+                cell.classList.add(COLORS[d.adjacent]);
+              }
+            }
+          } else if (d.flagged) {
+            cell.classList.add('flagged');
+            cell.textContent = t.flag;
+          } else {
+            cell.classList.add('hidden');
+          }
+
+          cell.addEventListener('click', () => handleClick(r, c));
+          cell.addEventListener('contextmenu', e => { e.preventDefault(); handleFlag(r, c); });
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    function getCellCenter(r, c) {
+      const board = document.getElementById('board');
+      const cell  = board.children[r * cols + c];
+      if (!cell) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      const rect = cell.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    }
+
+    function handleClick(r, c) {
+      if (gameOver || grid[r][c].revealed || grid[r][c].flagged) return;
+
+      if (firstClick) {
+        firstClick = false;
+        placeMines(r, c);
+        timerInterval = setInterval(() => {
+          seconds++;
+          document.getElementById('timer').textContent = seconds;
+        }, 1000);
+      }
+
+      // Get position BEFORE renderBoard recreates DOM
+      const pos = getCellCenter(r, c);
+
+      if (grid[r][c].mine) {
+        grid[r][c].revealed = true;
+        endGame(false, r, c);
+        // Taiko mine hit animations
+        tkRipple(pos.x, pos.y, '#e53935', 40);
+        tkPopup(pos.x, pos.y, 'ドカーン！', '#e53935');
+        tkScreenShake();
+        tkFlash('#ff0000');
+        donAnim('scared');
+        return;
+      }
+
+      const before = revealedCount;
+      reveal(r, c);
+      const revealed = revealedCount - before;
+      playSound(revealed > 1 ? 'flood' : 'click');
+
+      // Taiko reveal animations
+      if (revealed > 1) {
+        tkRipple(pos.x, pos.y, '#0984e3', 40);
+        tkPopup(pos.x, pos.y, 'ドドン！', '#0984e3');
+      } else {
+        tkRipple(pos.x, pos.y, '#e53935', 34);
+        tkPopup(pos.x, pos.y, 'ドン！', '#e53935');
+      }
+      donAnim('bounce');
+
+      checkWin();
+      renderBoard();
+    }
+
+    function reveal(r, c) {
+      if (grid[r][c].revealed || grid[r][c].flagged || grid[r][c].mine) return;
+      grid[r][c].revealed = true;
+      revealedCount++;
+      if (grid[r][c].adjacent === 0)
+        neighbors(r, c).forEach(([nr, nc]) => reveal(nr, nc));
+    }
+
+    function handleFlag(r, c) {
+      if (gameOver || grid[r][c].revealed) return;
+      const pos = getCellCenter(r, c);
+      grid[r][c].flagged = !grid[r][c].flagged;
+      playSound(grid[r][c].flagged ? 'flag' : 'unflag');
+      flagCount += grid[r][c].flagged ? 1 : -1;
+      document.getElementById('mines-left').textContent = totalMines - flagCount;
+
+      // Taiko flag animation (katsu = blue rim hit)
+      tkRipple(pos.x, pos.y, '#0984e3', 34);
+      tkPopup(pos.x, pos.y, grid[r][c].flagged ? 'カツ！' : 'カツ…', '#0984e3');
+      donAnim('bounce');
+
+      renderBoard();
+    }
+
+    function checkWin() {
+      if (revealedCount === rows * cols - totalMines) endGame(true);
+    }
+
+    function endGame(won, hitR, hitC) {
+      gameOver = true;
+      clearInterval(timerInterval);
+
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++)
+          if (grid[r][c].mine && !grid[r][c].flagged)
+            grid[r][c].revealed = true;
+
+      renderBoard();
+
+      if (!won && hitR !== undefined) {
+        const board = document.getElementById('board');
+        board.children[hitR * cols + hitC].classList.add('mine-hit');
+      }
+
+      playSound(won ? 'win' : 'boom');
+      const t = THEMES[currentTheme];
+      document.getElementById('message').textContent = won ? t.winMsg(seconds) : t.loseMsg();
+      recordGame(won, seconds);
+
+      // Taiko win celebration
+      if (won) {
+        donAnim('celebrate');
+        setTimeout(() => {
+          tkBanner('クリア！🎉');
+          tkFlash('#ffd700');
+          const boardEl = document.getElementById('board');
+          const br = boardEl.getBoundingClientRect();
+          for (let i = 0; i < 6; i++) {
+            setTimeout(() => {
+              tkConfetti(
+                br.left + Math.random() * br.width,
+                br.top  + Math.random() * br.height
+              );
+            }, i * 180);
+          }
+        }, 200);
+      }
+    }
+
+    // ── Taiko Animations ─────────────────────────────────────────────────────
+
+    function tkRipple(x, y, color, size) {
+      if (currentTheme !== 'taiko') return;
+      const el = document.createElement('div');
+      el.style.cssText = `
+        position:fixed; left:${x}px; top:${y}px;
+        width:${size}px; height:${size}px; border-radius:50%;
+        background:${color}; pointer-events:none; z-index:9000;
+      `;
+      document.body.appendChild(el);
+      el.animate([
+        { transform:'translate(-50%,-50%) scale(0)', opacity: 0.85 },
+        { transform:'translate(-50%,-50%) scale(5.5)', opacity: 0 },
+      ], { duration: 480, easing: 'ease-out' }).onfinish = () => el.remove();
+    }
+
+    function tkPopup(x, y, text, color) {
+      if (currentTheme !== 'taiko') return;
+      const el = document.createElement('div');
+      el.textContent = text;
+      el.style.cssText = `
+        position:fixed; left:${x}px; top:${y}px;
+        font-size:1.5rem; font-weight:900;
+        color:${color};
+        text-shadow:2px 2px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;
+        pointer-events:none; z-index:9001; white-space:nowrap;
+        font-family:'Kosugi Maru','Arial Rounded MT Bold',sans-serif;
+      `;
+      document.body.appendChild(el);
+      el.animate([
+        { transform:'translate(-50%,0) scale(0.2)',   opacity:1 },
+        { transform:'translate(-50%,-12px) scale(1.5)', opacity:1, offset:0.25 },
+        { transform:'translate(-50%,-38px) scale(1.1)', opacity:1, offset:0.65 },
+        { transform:'translate(-50%,-70px) scale(0.8)', opacity:0 },
+      ], { duration: 900, easing: 'ease-out' }).onfinish = () => el.remove();
+    }
+
+    function tkBanner(text) {
+      if (currentTheme !== 'taiko') return;
+      const el = document.createElement('div');
+      el.textContent = text;
+      el.style.cssText = `
+        position:fixed; left:50%; top:40%;
+        font-size:4.5rem; font-weight:900;
+        color:#ffd700;
+        text-shadow:4px 4px 0 #000,-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000;
+        pointer-events:none; z-index:9002; white-space:nowrap;
+        font-family:'Kosugi Maru','Arial Rounded MT Bold',sans-serif;
+      `;
+      document.body.appendChild(el);
+      el.animate([
+        { transform:'translate(-50%,-50%) scale(0.1) rotate(-15deg)', opacity:0 },
+        { transform:'translate(-50%,-50%) scale(1.25) rotate(4deg)',  opacity:1, offset:0.5 },
+        { transform:'translate(-50%,-50%) scale(1) rotate(0deg)',     opacity:1, offset:0.75 },
+        { transform:'translate(-50%,-50%) scale(2) rotate(0deg)',     opacity:0 },
+      ], { duration: 2200, easing: 'ease-out' }).onfinish = () => el.remove();
+    }
+
+    function tkScreenShake() {
+      if (currentTheme !== 'taiko') return;
+      const board = document.getElementById('board');
+      board.style.animation = 'none';
+      void board.offsetWidth;
+      board.style.animation = 'tk-shake 0.5s ease-out';
+      setTimeout(() => { board.style.animation = ''; }, 520);
+    }
+
+    function tkFlash(color) {
+      if (currentTheme !== 'taiko') return;
+      const el = document.createElement('div');
+      el.style.cssText = `
+        position:fixed; inset:0; background:${color};
+        pointer-events:none; z-index:8999; opacity:0;
+      `;
+      document.body.appendChild(el);
+      el.animate([
+        { opacity:0 }, { opacity:0.5 }, { opacity:0 }
+      ], { duration: 450, easing: 'ease-out' }).onfinish = () => el.remove();
+    }
+
+    function tkConfetti(x, y) {
+      if (currentTheme !== 'taiko') return;
+      const palette = ['#ff2d55','#ffd700','#00c4ff','#4cd964','#ff9500','#ff6b3d','#fff'];
+      for (let i = 0; i < 28; i++) {
+        const el = document.createElement('div');
+        const size = 6 + Math.random() * 8;
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        const angle = Math.random() * Math.PI * 2;
+        const dist  = 60 + Math.random() * 120;
+        const dx = Math.cos(angle) * dist;
+        const dy = -(Math.abs(Math.sin(angle)) * dist + 30);
+        el.style.cssText = `
+          position:fixed; left:${x}px; top:${y}px;
+          width:${size}px; height:${size}px;
+          border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+          background:${color}; pointer-events:none; z-index:9000;
+          transform:translate(-50%,-50%);
+        `;
+        document.body.appendChild(el);
+        el.animate([
+          { transform:`translate(-50%,-50%) rotate(0deg)`, opacity:1 },
+          { transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${540 + Math.random()*360}deg)`, opacity:0 },
+        ], {
+          duration: 800 + Math.random() * 600,
+          easing: 'cubic-bezier(0.25,0.46,0.45,0.94)',
+          delay: Math.random() * 200,
+        }).onfinish = () => el.remove();
+      }
+    }
+
+    function donAnim(state) {
+      if (currentTheme !== 'taiko') return;
+      const don = document.getElementById('don-chan');
+      don.classList.remove('bounce', 'scared', 'celebrate');
+      void don.offsetWidth; // restart animation
+      don.classList.add(state);
+      if (state !== 'celebrate') {
+        setTimeout(() => don.classList.remove(state), 1000);
+      }
+    }
+
+    // ── Stats (localStorage) ─────────────────────────────────────────────────
+    const STATS_KEY = 'deminer_stats';
+
+    function defaultStats() {
+      return { played: 0, won: 0, bestTime: null, streak: 0, maxStreak: 0 };
+    }
+
+    function loadStats() {
+      try {
+        return JSON.parse(localStorage.getItem(STATS_KEY)) ||
+          { easy: defaultStats(), medium: defaultStats(), hard: defaultStats() };
+      } catch { return { easy: defaultStats(), medium: defaultStats(), hard: defaultStats() }; }
+    }
+
+    function saveStats(stats) {
+      localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    }
+
+    function recordGame(won, timeSecs) {
+      const stats = loadStats();
+      const d = stats[currentDifficulty];
+      d.played++;
+      if (won) {
+        d.won++;
+        d.streak++;
+        if (d.streak > d.maxStreak) d.maxStreak = d.streak;
+        if (d.bestTime === null || timeSecs < d.bestTime) d.bestTime = timeSecs;
+      } else {
+        d.streak = 0;
+      }
+      saveStats(stats);
+      renderStats();
+    }
+
+    function renderStats() {
+      const stats = loadStats();
+      const tbody = document.getElementById('stats-body');
+      const labels = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+      tbody.innerHTML = Object.entries(labels).map(([key, label]) => {
+        const d = stats[key];
+        const pct = d.played ? Math.round(d.won / d.played * 100) : 0;
+        const best = d.bestTime !== null ? d.bestTime + 's' : '—';
+        const streak = d.maxStreak > 0
+          ? `${d.streak} <span style="opacity:.5">(best ${d.maxStreak})</span>`
+          : '0';
+        return `<tr>
+          <td>${label}</td>
+          <td>${d.played}</td>
+          <td>${d.won}</td>
+          <td>${pct}%</td>
+          <td class="best">${best}</td>
+          <td>${streak}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function resetStats() {
+      if (!confirm('Reset all statistics?')) return;
+      localStorage.removeItem(STATS_KEY);
+      renderStats();
+    }
+
+    startGame('easy');
+    renderStats();
+
+    // ── Sound Engine (Web Audio API, no external files) ──────────────────────
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    let muted = false;
+
+    function toggleMute() {
+      muted = !muted;
+      document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
+    }
+
+    function resume() { if (ac.state === 'suspended') ac.resume(); }
+
+    function osc(type, freq, start, dur, gainPeak, dest) {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, start);
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(gainPeak, start + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+      o.connect(g); g.connect(dest);
+      o.start(start); o.stop(start + dur);
+    }
+
+    function noise(dur, freq, q, gainPeak, start, dest) {
+      const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+      const flt = ac.createBiquadFilter();
+      flt.type = 'bandpass';
+      flt.frequency.value = freq;
+      flt.Q.value = q;
+      const g = ac.createGain();
+      g.gain.setValueAtTime(gainPeak, start);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+      src.connect(flt); flt.connect(g); g.connect(dest);
+      src.start(start); src.stop(start + dur);
+    }
+
+    // ── Default theme sounds ──
+    function sfxClick() {
+      const t = ac.currentTime;
+      osc('sine', 700, t, 0.08, 0.3, ac.destination);
+      osc('sine', 500, t + 0.01, 0.05, 0.1, ac.destination);
+    }
+    function sfxFlood() {
+      const t = ac.currentTime;
+      noise(0.18, 1200, 2, 0.4, t, ac.destination);
+      const flt = ac.createBiquadFilter();
+      flt.type = 'highpass';
+      flt.frequency.setValueAtTime(600, t);
+      flt.frequency.linearRampToValueAtTime(2000, t + 0.18);
+      noise(0.18, 800, 1, 0.2, t, flt);
+      flt.connect(ac.destination);
+    }
+    function sfxFlag() {
+      const t = ac.currentTime;
+      osc('square', 1400, t, 0.07, 0.15, ac.destination);
+      osc('sine',   1000, t, 0.1,  0.1,  ac.destination);
+    }
+    function sfxUnflag() {
+      const t = ac.currentTime;
+      osc('square', 900, t, 0.06, 0.12, ac.destination);
+    }
+    function sfxBoom() {
+      const t = ac.currentTime;
+      noise(0.8, 80,  0.8, 1.0, t, ac.destination);
+      noise(0.5, 300, 0.5, 0.6, t, ac.destination);
+      osc('sine', 60, t, 0.6, 0.8, ac.destination);
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(200, t);
+      o.frequency.exponentialRampToValueAtTime(30, t + 0.4);
+      g.gain.setValueAtTime(0.5, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + 0.4);
+    }
+    function sfxWin() {
+      const t = ac.currentTime;
+      const notes = [523, 659, 784, 1047];
+      notes.forEach((f, i) => osc('sine', f, t + i * 0.12, 0.3, 0.35, ac.destination));
+    }
+
+    // ── Warhammer theme sounds ──
+    function sfxStoneThud() {
+      const t = ac.currentTime;
+      noise(0.15, 120, 0.6, 0.7, t, ac.destination);
+      osc('sine', 90, t, 0.12, 0.4, ac.destination);
+    }
+    function sfxStoneRumble() {
+      const t = ac.currentTime;
+      noise(0.35, 100, 0.4, 0.8, t, ac.destination);
+      noise(0.25, 250, 0.8, 0.3, t + 0.02, ac.destination);
+      osc('sine', 70, t, 0.3, 0.3, ac.destination);
+    }
+    function sfxSwordClang() {
+      const t = ac.currentTime;
+      osc('sawtooth', 1800, t, 0.6, 0.4, ac.destination);
+      osc('sine',     2400, t, 0.5, 0.2, ac.destination);
+      osc('sine',      900, t, 0.2, 0.3, ac.destination);
+      noise(0.05, 3000, 1, 0.5, t, ac.destination);
+    }
+    function sfxSwordClangShort() {
+      const t = ac.currentTime;
+      osc('sawtooth', 1400, t, 0.25, 0.3, ac.destination);
+      noise(0.04, 2500, 1, 0.3, t, ac.destination);
+    }
+    function sfxWarhammerBoom() {
+      const t = ac.currentTime;
+      noise(1.2, 60,  0.5, 1.2, t, ac.destination);
+      noise(0.6, 200, 0.6, 0.7, t, ac.destination);
+      osc('sawtooth', 55, t, 0.9, 1.0, ac.destination);
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(300, t);
+      o.frequency.exponentialRampToValueAtTime(25, t + 0.7);
+      g.gain.setValueAtTime(0.8, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + 0.7);
+    }
+    function sfxWarhammerWin() {
+      const t = ac.currentTime;
+      const notes = [392, 494, 587, 784];
+      const times = [0, 0.18, 0.36, 0.6];
+      notes.forEach((f, i) => {
+        const dur = i === notes.length - 1 ? 0.8 : 0.25;
+        osc('sawtooth', f,     t + times[i], dur, 0.35, ac.destination);
+        osc('square',   f * 2, t + times[i], dur, 0.1,  ac.destination);
+      });
+    }
+
+    // ── Taiko theme sounds ──
+    function sfxTaikoDon() {
+      const t = ac.currentTime;
+      // Deep taiko center hit
+      noise(0.28, 95, 0.5, 0.85, t, ac.destination);
+      osc('sine', 75, t, 0.22, 0.9, ac.destination);
+      osc('sine', 150, t, 0.12, 0.3, ac.destination);
+      noise(0.04, 600, 2, 0.4, t, ac.destination);
+    }
+    function sfxTaikoDodoon() {
+      const t = ac.currentTime;
+      // Two don hits
+      noise(0.28, 95, 0.5, 0.85, t, ac.destination);
+      osc('sine', 75, t, 0.22, 0.9, ac.destination);
+      noise(0.28, 85, 0.5, 0.7, t + 0.18, ac.destination);
+      osc('sine', 65, t + 0.18, 0.2, 0.75, ac.destination);
+    }
+    function sfxTaikoKatsu() {
+      const t = ac.currentTime;
+      // Sharp rim hit
+      noise(0.1, 1100, 3.5, 0.65, t, ac.destination);
+      osc('square', 650, t, 0.07, 0.28, ac.destination);
+      osc('sine',   1300, t, 0.05, 0.12, ac.destination);
+    }
+    function sfxTaikoBoom() {
+      const t = ac.currentTime;
+      noise(0.55, 80, 0.6, 1.0, t, ac.destination);
+      osc('sine', 60, t, 0.45, 0.9, ac.destination);
+      // Comic descending pitch
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(500, t);
+      o.frequency.exponentialRampToValueAtTime(40, t + 0.55);
+      g.gain.setValueAtTime(0.55, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + 0.55);
+    }
+    function sfxTaikoClear() {
+      const t = ac.currentTime;
+      // Upbeat ascending fanfare
+      const notes = [523, 659, 784, 1047, 1319];
+      notes.forEach((f, i) => {
+        osc('sine',   f,     t + i * 0.1, 0.28, 0.38, ac.destination);
+        osc('square', f * 2, t + i * 0.1, 0.18, 0.09, ac.destination);
+      });
+      // Final chord
+      [523, 659, 784, 1047].forEach(f =>
+        osc('sine', f, t + 0.62, 0.6, 0.28, ac.destination)
+      );
+    }
+
+    function playSound(name) {
+      if (muted) return;
+      resume();
+      const wh = currentTheme === 'warhammer';
+      const tk = currentTheme === 'taiko';
+      switch (name) {
+        case 'click':  tk ? sfxTaikoDon()    : wh ? sfxStoneThud()      : sfxClick();  break;
+        case 'flood':  tk ? sfxTaikoDodoon() : wh ? sfxStoneRumble()    : sfxFlood();  break;
+        case 'flag':   tk ? sfxTaikoKatsu()  : wh ? sfxSwordClang()     : sfxFlag();   break;
+        case 'unflag': tk ? sfxTaikoKatsu()  : wh ? sfxSwordClangShort(): sfxUnflag(); break;
+        case 'boom':   tk ? sfxTaikoBoom()   : wh ? sfxWarhammerBoom()  : sfxBoom();   break;
+        case 'win':    tk ? sfxTaikoClear()  : wh ? sfxWarhammerWin()   : sfxWin();    break;
+      }
+    }
+    // ── Background Music ──────────────────────────────────────────────────────
+    const bgMusic = new Audio(`music/music${Math.floor(Math.random() * 4) + 1}.mp3`);
+    bgMusic.loop = true;
+    bgMusic.volume = 0.2; // kept low so game sounds stay louder
+
+    let musicMuted = false;
+
+    function tryPlayMusic() {
+      if (!musicMuted) bgMusic.play().catch(() => {});
+      document.removeEventListener('click',       tryPlayMusic);
+      document.removeEventListener('contextmenu', tryPlayMusic);
+    }
+
+    // Browsers block autoplay until the user interacts with the page
+    document.addEventListener('click',       tryPlayMusic);
+    document.addEventListener('contextmenu', tryPlayMusic);
+
+    function toggleMusic() {
+      musicMuted = !musicMuted;
+      if (musicMuted) {
+        bgMusic.pause();
+      } else {
+        bgMusic.play().catch(() => {});
+      }
+      document.getElementById('music-btn').textContent = musicMuted ? '🔇' : '🎵';
+    }
+  </script>
+</body>
+</html>
