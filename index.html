@@ -192,7 +192,7 @@
   }
   </script>
 
-  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=UnifrakturMaguntia&family=Kosugi+Maru&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=UnifrakturMaguntia&family=Kosugi+Maru&family=Fredoka+One&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -489,6 +489,11 @@
       background: radial-gradient(circle at 35% 30%, #ffe0e0, #ffb3b3 70%);
     }
 
+    body.taiko .cell.mine-defused {
+      background: radial-gradient(circle at 35% 30%, #fff9c4, #ffd700 70%) !important;
+      box-shadow: 0 0 16px rgba(255,215,0,0.8), inset 0 1px 4px rgba(255,255,200,0.5) !important;
+    }
+
     .n1 { color: var(--n1); }
     .n2 { color: var(--n2); }
     .n3 { color: var(--n3); }
@@ -652,6 +657,225 @@
       88% { transform: translate(-50%,-50%) scale(1)    rotate(0deg);  opacity: 1; }
       100%{ transform: translate(-50%,-50%) scale(2)    rotate(0deg);  opacity: 0; }
     }
+
+    /* ── Combo / Rhythm bar ── */
+    #combo-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      font-family: var(--font-body);
+      min-height: 26px;
+    }
+    #combo-count {
+      font-weight: bold;
+      color: var(--accent);
+      min-width: 72px;
+      font-variant-numeric: tabular-nums;
+    }
+    .rhythm-label {
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.12);
+      min-width: 92px;
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
+      color: var(--text);
+    }
+    #energy-bar-wrap {
+      width: 90px;
+      height: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 5px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    #energy-bar {
+      height: 100%;
+      width: 0%;
+      background: #ffd700;
+      border-radius: 5px;
+      transition: width 0.2s ease-out, background 0.3s;
+    }
+    #combo-score {
+      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+      font-size: 1rem;
+      color: #ffd700;
+      min-width: 62px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+
+    /* ── Total score display ── */
+    #total-score-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    #total-score-label {
+      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+      font-size: 0.8rem;
+      color: rgba(255,215,0,0.7);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    #total-score {
+      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+      font-size: 2.4rem;
+      color: #ffd700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+      text-shadow:
+        3px  3px 0 #8b0000,
+       -2px -2px 0 #8b0000,
+        2px -2px 0 #8b0000,
+       -2px  2px 0 #8b0000,
+        0    4px 10px rgba(0,0,0,0.4);
+      transition: transform 0.08s;
+    }
+    #total-score.pop {
+      animation: score-pop 0.22s ease-out;
+    }
+    @keyframes score-pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
+    @media (max-width: 520px) {
+      #combo-bar { gap: 6px; font-size: 0.75rem; }
+      #energy-bar-wrap { width: 56px; }
+      .rhythm-label { min-width: 66px; padding: 2px 6px; font-size: 0.75rem; }
+      #combo-score { min-width: 46px; font-size: 0.88rem; }
+      #total-score { font-size: 1.8rem; }
+    }
+
+    /* ── Mini-run challenge bar (Taiko style) ── */
+    #mini-run-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 7px 16px 7px 12px;
+      background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(30,10,0,0.45) 100%);
+      border-radius: 999px;
+      border: 2.5px solid rgba(255,215,0,0.5);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+      font-family: var(--font-body);
+      transition: border-color 0.3s, background 0.3s;
+    }
+    #mini-run-bar.complete {
+      border-color: #ffd700;
+      background: linear-gradient(135deg, rgba(180,120,0,0.35) 0%, rgba(80,40,0,0.35) 100%);
+      box-shadow: 0 2px 18px rgba(255,215,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    #mini-run-label {
+      font-weight: 900;
+      font-size: 0.68rem;
+      color: #ffd700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+      flex-shrink: 0;
+    }
+    #mini-run-steps {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    /* Each note is a Taiko-style circle */
+    .mr-step {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.52rem;
+      letter-spacing: -0.01em;
+      text-align: center;
+      line-height: 1.1;
+      color: #fff;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.55);
+      flex-shrink: 0;
+      position: relative;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      border: 2.5px solid rgba(255,255,255,0.2);
+    }
+    /* DON = red filled drum face */
+    .mr-step.don-step {
+      background: radial-gradient(circle at 35% 28%, #ff6b6b, #c0392b 75%);
+      box-shadow: 0 3px 10px rgba(192,57,43,0.6), inset 0 1px 4px rgba(255,180,150,0.3);
+    }
+    /* KATSU = blue rim hit */
+    .mr-step.katsu-step {
+      background: radial-gradient(circle at 35% 28%, #74b9ff, #0984e3 75%);
+      box-shadow: 0 3px 10px rgba(9,132,227,0.6), inset 0 1px 4px rgba(150,210,255,0.3);
+    }
+    .mr-step.done {
+      opacity: 0.38;
+      transform: scale(0.88);
+    }
+    .mr-step.done::after {
+      content: '✓';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+    }
+    .mr-step.active {
+      opacity: 1;
+      animation: mr-pulse 0.5s ease-in-out infinite alternate;
+    }
+    .mr-step.pending { opacity: 0.25; }
+    .mr-arrow {
+      color: rgba(255,215,0,0.4);
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+    @keyframes mr-pulse {
+      from { transform: scale(1);    }
+      to   { transform: scale(1.18); box-shadow: 0 0 16px 4px currentColor; }
+    }
+    #mini-run-timer {
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      font-size: 1rem;
+      color: #ffd700;
+      min-width: 28px;
+      text-align: right;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+      transition: color 0.3s;
+      flex-shrink: 0;
+    }
+    #mini-run-timer.urgent {
+      color: #ff2d55;
+      animation: mr-pulse 0.4s ease-in-out infinite alternate;
+    }
+    @media (max-width: 520px) {
+      #mini-run-bar { padding: 5px 10px; gap: 6px; }
+      .mr-step { width: 30px; height: 30px; font-size: 0.44rem; }
+      #mini-run-label { font-size: 0.6rem; }
+      #mini-run-timer { font-size: 0.85rem; }
+    }
+
+    /* ── Fever glow pulse on board ── */
+    @keyframes fever-pulse {
+      0%, 100% { box-shadow: 0 8px 40px rgba(200,50,0,0.5), 0 0 0 5px #ffd700, 0 0 0 9px #e53935; }
+      50%       { box-shadow: 0 8px 60px rgba(255,80,0,0.85), 0 0 0 6px #ff2d55, 0 0 0 13px #ffd700, 0 0 55px #ff6b00; }
+    }
+    body.taiko.fever #board { animation: fever-pulse 0.7s ease-in-out infinite; }
   </style>
 </head>
 <body class="taiko">
@@ -693,6 +917,21 @@
     <button class="theme-btn" id="music-btn" onclick="toggleMusic()">🎵</button>
   </div>
 
+  <div id="total-score-wrap">
+    <span id="total-score-label">SCORE</span>
+    <span id="total-score">0</span>
+  </div>
+  <div id="combo-bar">
+    <span id="combo-count">0 combo</span>
+    <span class="rhythm-label" id="rhythm-label">–</span>
+    <div id="energy-bar-wrap"><div id="energy-bar"></div></div>
+    <span id="combo-score">+0</span>
+  </div>
+  <div id="mini-run-bar">
+    <span id="mini-run-label">🥁 ×2</span>
+    <div id="mini-run-steps"></div>
+    <span id="mini-run-timer"></span>
+  </div>
   <div id="message"></div>
   <div id="board-wrap">
     <div id="board"></div>
@@ -730,6 +969,7 @@
           <th>Win %</th>
           <th>Best time</th>
           <th>Streak</th>
+          <th>Best score</th>
         </tr>
       </thead>
       <tbody id="stats-body"></tbody>
@@ -775,6 +1015,23 @@
     let currentDifficulty = 'easy';
     let flagMode = false;
 
+    // ── Rhythm / Combo / Score ────────────────────────────────────────────────
+    const RHYTHM_LEVELS = [
+      { label: '–',           min: 0,  mult: 1, color: '#ffffff', musicVol: 0.20 },
+      { label: 'GOOD!',       min: 3,  mult: 2, color: '#4cd964', musicVol: 0.25 },
+      { label: 'GREAT!',      min: 6,  mult: 3, color: '#ffd700', musicVol: 0.30 },
+      { label: 'FEVER! 🔥',   min: 10, mult: 5, color: '#ff9500', musicVol: 0.38 },
+      { label: 'DON FEVER!!', min: 15, mult: 8, color: '#ff2d55', musicVol: 0.45 },
+    ];
+    let combo = 0, score = 0, comboScore = 0, rhythmLevel = 0;
+    let _scoreDisplay = 0, _scoreRAF = null, lastMilestone = 0;
+
+    const MINI_RUN_POOL = [
+      { id: 'don',   label: 'DON',   color: '#e53935' },
+      { id: 'katsu', label: 'KATSU', color: '#0984e3' },
+    ];
+    let miniRun = null, miniRunStep = 0, miniRunTimer = null, miniRunSeconds = 0, miniRunCount = 0, defusedCount = 0;
+
     function computeCellSize() {
       const boardPad = (currentTheme === 'taiko' ? 12 : 8) * 2;
       const gap      =  currentTheme === 'taiko' ? 4 : 2;
@@ -788,6 +1045,279 @@
       const btn = document.getElementById('flag-mode-btn');
       btn.classList.toggle('active', flagMode);
       btn.title = flagMode ? 'Flag mode ON — tap to flag' : 'Flag mode OFF — tap to reveal';
+    }
+
+    function startMiniRunTimer() {
+      clearInterval(miniRunTimer);
+      miniRunSeconds = 15;
+      updateMiniRunTimer();
+      miniRunTimer = setInterval(() => {
+        miniRunSeconds--;
+        updateMiniRunTimer();
+        if (miniRunSeconds <= 0) {
+          clearInterval(miniRunTimer);
+          miniRunStep = 0;
+          generateMiniRun();
+        }
+      }, 1000);
+    }
+
+    function stopMiniRunTimer() {
+      clearInterval(miniRunTimer);
+      miniRunTimer = null;
+      const el = document.getElementById('mini-run-timer');
+      if (el) el.textContent = '';
+    }
+
+    function updateMiniRunTimer() {
+      const el = document.getElementById('mini-run-timer');
+      if (!el) return;
+      el.textContent = miniRunSeconds + 's';
+      el.classList.toggle('urgent', miniRunSeconds <= 5);
+    }
+
+    function generateMiniRun() {
+      const len = Math.min(2 + miniRunCount, 5);
+      miniRun = Array.from({ length: len }, () =>
+        MINI_RUN_POOL[Math.floor(Math.random() * MINI_RUN_POOL.length)]
+      );
+      miniRunStep = 0;
+      document.getElementById('mini-run-bar').classList.remove('complete');
+      document.getElementById('mini-run-label').textContent = '🥁 ×' + len;
+      updateMiniRunUI();
+    }
+
+    function advanceMiniRun(actionId) {
+      if (!miniRun || gameOver || miniRunStep >= miniRun.length) return;
+      if (miniRun[miniRunStep].id === actionId) {
+        if (miniRunStep === 0) startMiniRunTimer(); // start timer on first hit
+        miniRunStep++;
+        updateMiniRunUI();
+        if (miniRunStep >= miniRun.length) completeMiniRun();
+      } else if (miniRunStep > 0) {
+        miniRunStep = 0;
+        stopMiniRunTimer(); // abort timer on mistake
+        updateMiniRunUI();
+      }
+    }
+
+    function completeMiniRun() {
+      miniRunCount++;
+      stopMiniRunTimer();
+      const bonus = miniRun.length * 50 * RHYTHM_LEVELS[rhythmLevel].mult;
+      score += bonus;
+      updateRhythmUI();
+      const bar = document.getElementById('mini-run-bar');
+      bar.classList.add('complete');
+      document.getElementById('mini-run-label').textContent = '✨ Perfect run!';
+      tkScorePopup(window.innerWidth / 2, window.innerHeight * 0.35, '+' + bonus + ' PERFECT!', '#ffd700');
+      spawnScoreParticle(bonus, '#ffd700');
+      tkFlash('#ffd700');
+      playSound('win');
+      setTimeout(() => generateMiniRun(), 2200);
+    }
+
+    function updateMiniRunUI() {
+      const container = document.getElementById('mini-run-steps');
+      if (!container || !miniRun) return;
+      container.innerHTML = '';
+      miniRun.forEach((step, i) => {
+        if (i > 0) {
+          const arrow = document.createElement('span');
+          arrow.className = 'mr-arrow';
+          arrow.textContent = '▶';
+          container.appendChild(arrow);
+        }
+        const el = document.createElement('span');
+        const state = i < miniRunStep ? 'done' : i === miniRunStep ? 'active' : 'pending';
+        const typeClass = step.id === 'katsu' ? 'katsu-step' : 'don-step';
+        el.className = 'mr-step ' + typeClass + ' ' + state;
+        if (state !== 'done') el.textContent = step.label;
+        container.appendChild(el);
+      });
+    }
+
+    function revealFreeMine() {
+      if (gameOver || firstClick || !grid) return;
+      const candidates = [];
+      for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++)
+          if (grid[r][c].mine && !grid[r][c].revealed && !grid[r][c].flagged)
+            candidates.push([r, c]);
+      if (candidates.length === 0) return;
+
+      const [r, c] = candidates[Math.floor(Math.random() * candidates.length)];
+      grid[r][c].revealed = true;
+      grid[r][c].defused  = true;
+      defusedCount++;
+      document.getElementById('mines-left').textContent = totalMines - flagCount - defusedCount;
+      renderBoard();
+
+      // Grab the cell from the freshly rendered DOM
+      const board  = document.getElementById('board');
+      const cellEl = board.children[r * cols + c];
+      const rect   = cellEl.getBoundingClientRect();
+      const x = rect.left + rect.width  / 2;
+      const y = rect.top  + rect.height / 2;
+
+      // Cell entrance spin-in
+      cellEl.animate([
+        { transform: 'scale(0) rotate(-180deg)', opacity: 0   },
+        { transform: 'scale(1.35) rotate(12deg)', opacity: 1, offset: 0.65 },
+        { transform: 'scale(1) rotate(0deg)',     opacity: 1  },
+      ], { duration: 560, easing: 'ease-out' });
+
+      tkRipple(x, y, '#ffd700', 46);
+      tkPopup(x, y, 'SAFE! 💣', '#ffd700');
+      tkFlash('#ffd700');
+      donAnim('bounce');
+      playSound('flood');
+    }
+
+    function animateScoreCounter(target) {
+      const el = document.getElementById('total-score');
+      if (!el) return;
+      if (_scoreRAF) cancelAnimationFrame(_scoreRAF);
+      const from = _scoreDisplay;
+      const startTime = performance.now();
+      const duration = Math.min(600, 80 + Math.abs(target - from) * 0.4);
+      function tick(now) {
+        const t = Math.min((now - startTime) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3);
+        const prev = _scoreDisplay;
+        _scoreDisplay = Math.round(from + (target - from) * ease);
+        el.textContent = _scoreDisplay.toLocaleString();
+
+        // Fire mine reveal exactly when counter crosses each 1000-pt threshold
+        const prevM = Math.floor(prev        / 1000);
+        const currM = Math.floor(_scoreDisplay / 1000);
+        if (currM > prevM) {
+          for (let m = prevM + 1; m <= currM; m++) {
+            if (m > lastMilestone) {
+              lastMilestone = m;
+              setTimeout(revealFreeMine, (m - prevM - 1) * 900);
+            }
+          }
+        }
+
+        if (t < 1) {
+          _scoreRAF = requestAnimationFrame(tick);
+        } else {
+          _scoreRAF = null;
+          el.classList.remove('pop');
+          void el.offsetWidth;
+          el.classList.add('pop');
+          setTimeout(() => el.classList.remove('pop'), 220);
+        }
+      }
+      _scoreRAF = requestAnimationFrame(tick);
+    }
+
+    function spawnScoreParticle(points, color) {
+      if (currentTheme !== 'taiko') return;
+      const fromEl = document.getElementById('combo-score');
+      const toEl   = document.getElementById('total-score');
+      if (!fromEl || !toEl) return;
+      const fr = fromEl.getBoundingClientRect();
+      const tr = toEl.getBoundingClientRect();
+      const startX = fr.left + fr.width  / 2;
+      const startY = fr.top  + fr.height / 2;
+      const dx = tr.left + tr.width  / 2 - startX;
+      const dy = tr.top  + tr.height / 2 - startY;
+      const target = score; // capture total at spawn time
+      const el = document.createElement('div');
+      el.textContent = '+' + points.toLocaleString();
+      el.style.cssText = `
+        position:fixed; left:${startX}px; top:${startY}px;
+        font-family:'Fredoka One','Kosugi Maru',sans-serif;
+        font-size:1.15rem; color:${color};
+        text-shadow:2px 2px 0 #000,-1px -1px 0 #000;
+        pointer-events:none; z-index:9005; white-space:nowrap;
+        transform:translate(-50%,-50%);
+      `;
+      document.body.appendChild(el);
+      el.animate([
+        { transform:'translate(-50%,-50%) scale(1.3)',                                                        opacity:1, offset:0   },
+        { transform:`translate(calc(-50% + ${dx*.45}px),calc(-50% + ${dy*.4 - 22}px)) scale(1.05)`,          opacity:1, offset:0.5 },
+        { transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(0.45)`,                      opacity:0, offset:1   },
+      ], { duration:680, easing:'ease-in' }).onfinish = () => {
+        el.remove();
+        animateScoreCounter(target);
+      };
+    }
+
+    function calcRhythmLevel(c) {
+      let lvl = 0;
+      for (let i = 0; i < RHYTHM_LEVELS.length; i++)
+        if (c >= RHYTHM_LEVELS[i].min) lvl = i;
+      return lvl;
+    }
+
+    function addCombo(basePoints, x, y) {
+      combo++;
+      const earned = basePoints * RHYTHM_LEVELS[rhythmLevel].mult;
+      score += earned;
+      comboScore += earned;
+      const prev = rhythmLevel;
+      rhythmLevel = calcRhythmLevel(combo);
+      updateRhythmUI();
+      updateMusicIntensity();
+      if (rhythmLevel > prev && rhythmLevel >= 3) triggerBeatDrop();
+      if (x !== undefined) tkScorePopup(x, y, '+' + earned, RHYTHM_LEVELS[rhythmLevel].color);
+      spawnScoreParticle(earned, RHYTHM_LEVELS[rhythmLevel].color);
+    }
+
+    function breakCombo() {
+      combo = 0;
+      comboScore = 0;
+      rhythmLevel = 0;
+      document.body.classList.remove('fever');
+      updateRhythmUI();
+      updateMusicIntensity();
+    }
+
+    function triggerBeatDrop() {
+      document.body.classList.add('fever');
+      playSound('beatdrop');
+      tkFlash('#ff4500');
+      setTimeout(() => tkBanner(RHYTHM_LEVELS[rhythmLevel].label), 60);
+    }
+
+    function updateRhythmUI() {
+      const rl      = RHYTHM_LEVELS[rhythmLevel];
+      const isMax   = rhythmLevel === RHYTHM_LEVELS.length - 1;
+      const nextMin = isMax ? rl.min + 5 : RHYTHM_LEVELS[rhythmLevel + 1].min;
+      const fill    = isMax ? 100 : Math.min(100, ((combo - rl.min) / (nextMin - rl.min)) * 100);
+      document.getElementById('combo-count').textContent   = combo + ' combo';
+      const labelEl = document.getElementById('rhythm-label');
+      labelEl.textContent      = rl.label;
+      labelEl.style.background = rl.color + '33';
+      labelEl.style.color      = rl.color;
+      document.getElementById('energy-bar').style.width      = fill + '%';
+      document.getElementById('energy-bar').style.background = rl.color;
+      document.getElementById('combo-score').textContent     = comboScore > 0 ? '+' + comboScore.toLocaleString() : '+0';
+    }
+
+    function updateMusicIntensity() {
+      if (!musicMuted) bgMusic.volume = RHYTHM_LEVELS[rhythmLevel].musicVol;
+    }
+
+    function tkScorePopup(x, y, text, color) {
+      if (currentTheme !== 'taiko') return;
+      const el = document.createElement('div');
+      el.textContent = text;
+      el.style.cssText = `
+        position:fixed; left:${x}px; top:${y + 24}px;
+        font-size:0.9rem; font-weight:900; color:${color};
+        text-shadow:1px 1px 0 #000,-1px -1px 0 #000;
+        pointer-events:none; z-index:9001; white-space:nowrap;
+        font-family:'Kosugi Maru','Arial Rounded MT Bold',sans-serif;
+      `;
+      document.body.appendChild(el);
+      el.animate([
+        { transform:'translate(-50%,0)',     opacity:1 },
+        { transform:'translate(-50%,-44px)', opacity:0 },
+      ], { duration:750, easing:'ease-out' }).onfinish = () => el.remove();
     }
 
     function startGame(difficulty) {
@@ -816,6 +1346,16 @@
       flagMode = false;
       const flagBtn = document.getElementById('flag-mode-btn');
       flagBtn.classList.remove('active');
+
+      // reset rhythm / score / mini-run
+      combo = 0; score = 0; comboScore = 0; rhythmLevel = 0; lastMilestone = 0; miniRunCount = 0; defusedCount = 0;
+      _scoreDisplay = 0;
+      if (_scoreRAF) { cancelAnimationFrame(_scoreRAF); _scoreRAF = null; }
+      const tsEl = document.getElementById('total-score');
+      if (tsEl) tsEl.textContent = '0';
+      document.body.classList.remove('fever');
+      updateRhythmUI();
+      generateMiniRun();
 
       // stop don-chan celebrate loop
       const don = document.getElementById('don-chan');
@@ -874,6 +1414,7 @@
           if (d.revealed) {
             if (d.mine) {
               cell.classList.add('mine-revealed');
+              if (d.defused) cell.classList.add('mine-defused');
               cell.textContent = t.mine;
             } else {
               cell.classList.add('revealed');
@@ -929,6 +1470,7 @@
         tkScreenShake();
         tkFlash('#ff0000');
         donAnim('scared');
+        breakCombo();
         return;
       }
 
@@ -946,6 +1488,8 @@
         tkPopup(pos.x, pos.y, 'ドン！', '#e53935');
       }
       donAnim('bounce');
+      addCombo(revealed > 1 ? revealed * 10 : 10, pos.x, pos.y);
+      advanceMiniRun('don');
 
       checkWin();
       renderBoard();
@@ -971,6 +1515,7 @@
       tkRipple(pos.x, pos.y, '#0984e3', 34);
       tkPopup(pos.x, pos.y, grid[r][c].flagged ? 'カツ！' : 'カツ…', '#0984e3');
       donAnim('bounce');
+      if (grid[r][c].flagged) { addCombo(5, pos.x, pos.y); advanceMiniRun('katsu'); }
 
       renderBoard();
     }
@@ -999,6 +1544,22 @@
       const t = THEMES[currentTheme];
       document.getElementById('message').textContent = won ? t.winMsg(seconds) : t.loseMsg();
       recordGame(won, seconds);
+
+      // freeze mini-run display on game end
+      miniRun = null;
+      stopMiniRunTimer();
+      document.getElementById('mini-run-steps').innerHTML = '';
+      document.getElementById('mini-run-label').textContent = '';
+
+      if (won) {
+        const bonus = 500 + Math.max(0, 300 - seconds * 2);
+        score += bonus;
+        updateRhythmUI();
+        setTimeout(() => {
+          tkScorePopup(window.innerWidth / 2, window.innerHeight / 3, '+' + bonus + ' BONUS!', '#ffd700');
+          spawnScoreParticle(bonus, '#ffd700');
+        }, 400);
+      }
 
       // Taiko win celebration
       if (won) {
@@ -1146,7 +1707,7 @@
     const STATS_KEY = 'deminer_stats';
 
     function defaultStats() {
-      return { played: 0, won: 0, bestTime: null, streak: 0, maxStreak: 0 };
+      return { played: 0, won: 0, bestTime: null, streak: 0, maxStreak: 0, bestScore: 0 };
     }
 
     function loadStats() {
@@ -1169,6 +1730,7 @@
         d.streak++;
         if (d.streak > d.maxStreak) d.maxStreak = d.streak;
         if (d.bestTime === null || timeSecs < d.bestTime) d.bestTime = timeSecs;
+        if (score > (d.bestScore || 0)) d.bestScore = score;
       } else {
         d.streak = 0;
       }
@@ -1187,6 +1749,7 @@
         const streak = d.maxStreak > 0
           ? `${d.streak} <span style="opacity:.5">(best ${d.maxStreak})</span>`
           : '0';
+        const topScore = d.bestScore ? d.bestScore.toLocaleString() : '—';
         return `<tr>
           <td>${label}</td>
           <td>${d.played}</td>
@@ -1194,6 +1757,7 @@
           <td>${pct}%</td>
           <td class="best">${best}</td>
           <td>${streak}</td>
+          <td class="best">${topScore}</td>
         </tr>`;
       }).join('');
     }
@@ -1396,6 +1960,25 @@
       );
     }
 
+    function sfxBeatDrop() {
+      const t = ac.currentTime;
+      // Rising whoosh
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(80, t);
+      o.frequency.exponentialRampToValueAtTime(600, t + 0.25);
+      g.gain.setValueAtTime(0.6, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + 0.3);
+      // Impact double-don
+      noise(0.35, 90, 0.55, 1.0, t + 0.27, ac.destination);
+      osc('sine', 72, t + 0.27, 0.28, 1.0, ac.destination);
+      noise(0.28, 80, 0.5, 0.8, t + 0.44, ac.destination);
+      osc('sine', 60, t + 0.44, 0.22, 0.7, ac.destination);
+    }
+
     function playSound(name) {
       if (muted) return;
       resume();
@@ -1407,7 +1990,8 @@
         case 'flag':   tk ? sfxTaikoKatsu()  : wh ? sfxSwordClang()     : sfxFlag();   break;
         case 'unflag': tk ? sfxTaikoKatsu()  : wh ? sfxSwordClangShort(): sfxUnflag(); break;
         case 'boom':   tk ? sfxTaikoBoom()   : wh ? sfxWarhammerBoom()  : sfxBoom();   break;
-        case 'win':    tk ? sfxTaikoClear()  : wh ? sfxWarhammerWin()   : sfxWin();    break;
+        case 'win':      tk ? sfxTaikoClear()  : wh ? sfxWarhammerWin()   : sfxWin();    break;
+        case 'beatdrop': if (tk) sfxBeatDrop(); break;
       }
     }
     // Re-compute cell size on resize (e.g. orientation change)
