@@ -64,7 +64,6 @@ Then open `http://localhost:8000`.
 6. Flag cells you think contain mines.
 7. Clicking a mine ends the game immediately.
 8. You win when all non-mine cells are revealed.
-9. The current implementation also declares a win when `placed flags + auto-defused mines == total mines`.
 
 ## Scoring And Special Systems
 

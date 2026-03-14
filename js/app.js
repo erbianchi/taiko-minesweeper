@@ -521,7 +521,6 @@ function handleFlag(r, c) {
 
 function checkWin() {
   if (revealedCount === rows * cols - totalMines) { endGame(true); return; }
-  if (flagCount + defusedCount === totalMines)    { endGame(true); return; }
 }
 
 function endGame(won, hitR, hitC) {
