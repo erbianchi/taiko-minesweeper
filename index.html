@@ -192,820 +192,10 @@
   }
   </script>
 
-  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=UnifrakturMaguntia&family=Kosugi+Maru&family=Fredoka+One&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* ── Default theme variables ── */
-    :root {
-      --cell: 34px;
-      --bg:           #1a1a2e;
-      --bg-board:     #16213e;
-      --bg-cell:      #0f3460;
-      --bg-cell-hover:#1a4a80;
-      --bg-revealed:  #0a1628;
-      --bg-mine-hit:  #e94560;
-      --bg-mine-rev:  #1a1a2e;
-      --accent:       #e94560;
-      --accent2:      #f5c518;
-      --text:         #eee;
-      --border-radius-board: 8px;
-      --border-radius-cell:  4px;
-      --board-border: none;
-      --cell-border:  none;
-      --font-body:    'Segoe UI', sans-serif;
-      --font-title:   'Segoe UI', sans-serif;
-      --title-shadow: none;
-      --board-shadow: 0 4px 24px rgba(0,0,0,0.5);
-      --n1: #58a6ff; --n2: #3fb950; --n3: #f85149; --n4: #8b5cf6;
-      --n5: #f0883e; --n6: #56d364; --n7: #e94560; --n8: #8b949e;
-    }
-
-    /* ── Warhammer theme variables ── */
-    body.warhammer {
-      --bg:           #1a0f06;
-      --bg-board:     #2a1a08;
-      --bg-cell:      #3b2510;
-      --bg-cell-hover:#52341a;
-      --bg-revealed:  #1e1208;
-      --bg-mine-hit:  #7a0a00;
-      --bg-mine-rev:  #1a0f06;
-      --accent:       #c8922a;
-      --accent2:      #e8c060;
-      --text:         #e8d5a0;
-      --border-radius-board: 2px;
-      --border-radius-cell:  1px;
-      --board-border: 3px solid #7a5520;
-      --cell-border:  1px solid #5a3a10;
-      --font-body:    Georgia, 'Times New Roman', serif;
-      --font-title:   'UnifrakturMaguntia', 'MedievalSharp', cursive;
-      --title-shadow: 2px 2px 8px rgba(200,100,0,0.7), 0 0 20px rgba(200,80,0,0.4);
-      --board-shadow: 0 6px 32px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.4);
-      --n1: #d4a84b; --n2: #8fbc6a; --n3: #cc4422; --n4: #9966cc;
-      --n5: #dd7722; --n6: #44aa66; --n7: #cc2200; --n8: #997755;
-    }
-
-    /* ── Taiko theme variables ── */
-    body.taiko {
-      --bg:           #ff7a00;
-      --bg-board:     #fffaf0;
-      --bg-cell:      #d63031;
-      --bg-cell-hover:#e84646;
-      --bg-revealed:  #fff9e6;
-      --bg-mine-hit:  #c0392b;
-      --bg-mine-rev:  #fdecea;
-      --accent:       #ffd700;
-      --accent2:      #ffffff;
-      --text:         #2d0000;
-      --border-radius-board: 20px;
-      --border-radius-cell:  50%;
-      --board-border: 4px solid #ffd700;
-      --cell-border:  2px solid rgba(0,0,0,0.12);
-      --font-body:    'Kosugi Maru', 'Arial Rounded MT Bold', sans-serif;
-      --font-title:   'Kosugi Maru', 'Arial Rounded MT Bold', sans-serif;
-      --title-shadow: 3px 3px 0 #8b0000, -1px -1px 0 #8b0000;
-      --board-shadow: 0 8px 40px rgba(200,50,0,0.5), 0 0 0 5px #ffd700, 0 0 0 9px #e53935;
-      --n1: #1565c0; --n2: #2e7d32; --n3: #c62828; --n4: #6a1b9a;
-      --n5: #e65100; --n6: #00695c; --n7: #ad1457; --n8: #37474f;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-body);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 24px 16px;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    body.warhammer {
-      background-image:
-        radial-gradient(ellipse at top, #2d1500 0%, #1a0f06 60%),
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    body.taiko {
-      background: linear-gradient(150deg, #ffb74d 0%, #ff6d00 45%, #e64a19 100%);
-      background-attachment: fixed;
-    }
-
-    h1 {
-      font-size: 2.4rem;
-      letter-spacing: 0.12em;
-      margin-bottom: 20px;
-      color: var(--accent);
-      font-family: var(--font-title);
-      text-shadow: var(--title-shadow);
-      transition: all 0.3s;
-    }
-
-    body.warhammer h1::before { content: '☩ '; }
-    body.warhammer h1::after  { content: ' ☩'; }
-    body.taiko h1 { color: #fff; font-size: 3rem; letter-spacing: 0.2em; }
-    body.taiko h1::before { content: '🥁 '; }
-    body.taiko h1::after  { content: ' 🥁'; }
-
-    /* ── Don-chan mascot ── */
-    .don-chan-wrap {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      height: 56px;
-    }
-    body.taiko .don-chan-wrap { display: flex; }
-
-    .don-chan {
-      width: 52px;
-      height: 52px;
-      transform-origin: bottom center;
-      cursor: default;
-      user-select: none;
-    }
-    .don-chan.bounce   { animation: dc-bounce   0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
-    .don-chan.scared   { animation: dc-scared   0.55s ease-out; }
-    .don-chan.celebrate{ animation: dc-celebrate 0.7s ease-in-out infinite; }
-
-    /* ── Restart button (replaces combo bar on game over) ── */
-    #restart-btn {
-      display: none;
-      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 900;
-      color: #ffd700;
-      background: #e53935;
-      border: none;
-      border-radius: 12px;
-      padding: 4px 28px;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 3px 3px 0 #8b0000, 0 0 14px rgba(229,57,53,0.5);
-      text-shadow: 1px 1px 0 #8b0000, -1px -1px 0 #8b0000;
-      margin-bottom: 10px;
-      animation: restart-pop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-    }
-    #restart-btn:hover { background: #ff5252; box-shadow: 3px 3px 0 #8b0000, 0 0 20px rgba(229,57,53,0.9); }
-    @keyframes restart-pop {
-      0%   { transform: scale(0); opacity: 0; }
-      70%  { transform: scale(1.1); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    body.game-over #combo-bar  { display: none; }
-    body.game-over #restart-btn { display: block; }
-
-    /* ── Don-chan face animations ── */
-    @keyframes dc-blink {
-      0%, 88%, 100% { transform: scaleY(1); }
-      92%           { transform: scaleY(0.07); }
-      96%           { transform: scaleY(1); }
-    }
-    @keyframes dc-look {
-      0%,100% { transform: translate(0px,  0px); }
-      20%     { transform: translate(1px,  0px); }
-      50%     { transform: translate(0.5px,0.8px); }
-      75%     { transform: translate(-0.8px,0px); }
-    }
-
-    /* Eyes blink continuously */
-    .dc-eye {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: dc-blink 3.8s ease-in-out infinite;
-    }
-    .dc-eye-r { animation-delay: 0.05s; }
-
-    /* Pupils drift lazily */
-    .dc-pupil {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: dc-look 6s ease-in-out infinite;
-    }
-    .dc-pupil-r { animation-delay: -2s; }
-    .dc-shine {
-      transform-box: fill-box;
-      transform-origin: center;
-    }
-
-    /* Eyebrows: only one set visible at a time */
-    .dc-brow { stroke: #b71c1c; stroke-width: 2.5; fill: none; stroke-linecap: round; }
-    .dc-brow-scared, .dc-brow-happy { display: none; }
-
-    /* Mouths: only one visible at a time */
-    .dc-mouth { display: none; }
-    .dc-mouth-default { display: block; }
-
-    /* ── bounce: happy squint ── */
-    .don-chan.bounce .dc-eye    { transform: scaleY(0.35); animation: none; }
-    .don-chan.bounce .dc-pupil  { transform: translateY(-1.5px); animation: none; }
-    .don-chan.bounce .dc-shine  { transform: translateY(-1.5px); }
-    .don-chan.bounce .dc-mouth-default  { display: none; }
-    .don-chan.bounce .dc-mouth-bounce   { display: block; }
-    .don-chan.bounce .dc-brow-normal    { display: none; }
-    .don-chan.bounce .dc-brow-happy     { display: block; }
-
-    /* ── scared: wide eyes, open mouth ── */
-    .don-chan.scared .dc-eye    { transform: scaleY(1.25) scaleX(1.05); animation: none; }
-    .don-chan.scared .dc-pupil  { transform: scale(0.7); animation: none; }
-    .don-chan.scared .dc-mouth-default  { display: none; }
-    .don-chan.scared .dc-mouth-scared   { display: block; }
-    .don-chan.scared .dc-brow-normal    { display: none; }
-    .don-chan.scared .dc-brow-scared    { display: block; }
-
-    /* ── celebrate: crescent squint, big smile ── */
-    .don-chan.celebrate .dc-eye    { transform: scaleY(0.12); animation: none; }
-    .don-chan.celebrate .dc-pupil  { opacity: 0; animation: none; }
-    .don-chan.celebrate .dc-shine  { opacity: 0; }
-    .don-chan.celebrate .dc-mouth-default   { display: none; }
-    .don-chan.celebrate .dc-mouth-celebrate { display: block; }
-    .don-chan.celebrate .dc-brow-normal     { display: none; }
-    .don-chan.celebrate .dc-brow-happy      { display: block; }
-
-    .theme-btn {
-      padding: 5px 14px;
-      border: 1px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-family: var(--font-body);
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .theme-btn:hover, .theme-btn.active {
-      background: var(--accent);
-      color: var(--bg);
-    }
-
-    /* ── Header row: [diff-left] [don-chan] [util-btns] ── */
-    #header-row {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      width: 100%;
-      max-width: 520px;
-      margin-bottom: 10px;
-      opacity: 0.65;
-      transition: opacity 0.25s;
-    }
-    #header-row:hover { opacity: 1; }
-
-    #diff-left {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      justify-self: start;
-    }
-
-    #header-row #util-btns {
-      justify-self: end;
-    }
-
-    .restart-btn {
-      padding: 5px 11px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(0,0,0,0.25);
-      color: rgba(255,255,255,0.65);
-      border-radius: 14px;
-      cursor: pointer;
-      font-size: 0.7rem;
-      font-family: var(--font-body);
-      font-weight: bold;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .restart-btn:hover { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.35); }
-
-    #util-btns {
-      display: flex;
-      gap: 5px;
-    }
-    #util-btns button {
-      width: 28px;
-      height: 28px;
-      border: none;
-      background: rgba(0,0,0,0.22);
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 0.82rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.15s, background 0.15s;
-      font-family: var(--font-body);
-    }
-    #util-btns button:hover { background: rgba(255,255,255,0.18); }
-    #util-btns button.active { background: var(--accent); color: var(--bg); }
-
-    /* ── Score HUD: mines | SCORE | timer ── */
-    #score-hud {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      width: 100%;
-      max-width: 520px;
-      margin-bottom: 10px;
-    }
-    .hud-stat {
-      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-      font-size: 1rem;
-      color: rgba(255,255,255,0.65);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-variant-numeric: tabular-nums;
-    }
-    .hud-stat span { color: #ffd700; }
-    .hud-stat.right { justify-self: end; }
-
-    #message {
-      height: 28px;
-      font-size: 1.1rem;
-      margin-bottom: 12px;
-      font-weight: bold;
-      color: var(--accent2);
-      font-family: var(--font-body);
-    }
-
-    body.warhammer #message { font-style: italic; letter-spacing: 0.05em; }
-    body.taiko #message { font-size: 1.3rem; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
-
-    #board {
-      display: inline-grid;
-      gap: 2px;
-      background: var(--bg-board);
-      padding: 8px;
-      border-radius: var(--border-radius-board);
-      border: var(--board-border);
-      box-shadow: var(--board-shadow);
-      user-select: none;
-      transition: all 0.3s;
-    }
-
-    body.warhammer #board {
-      padding: 10px;
-      outline: 2px solid #4a2a05;
-      outline-offset: 3px;
-    }
-
-    body.taiko #board { padding: 12px; gap: 4px; }
-
-    .cell {
-      width: var(--cell);
-      height: var(--cell);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: calc(var(--cell) * 0.43);
-      font-weight: bold;
-      border-radius: var(--border-radius-cell);
-      border: var(--cell-border);
-      cursor: pointer;
-      transition: background 0.08s;
-      font-family: var(--font-body);
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body.taiko .cell { transition: background 0.08s, transform 0.1s; }
-
-    .cell.hidden { background: var(--bg-cell); }
-
-    @media (hover: hover) {
-      .cell.hidden:hover { background: var(--bg-cell-hover); }
-      body.taiko .cell.hidden:hover {
-        background: radial-gradient(circle at 35% 30%, #ff8e8e, #e04040 70%);
-        transform: scale(1.12);
-        box-shadow: 0 5px 12px rgba(0,0,0,0.35);
-      }
-    }
-
-    body.warhammer .cell.hidden {
-      background: var(--bg-cell);
-      background-image: linear-gradient(135deg, rgba(255,200,100,0.04) 0%, transparent 50%);
-    }
-
-    body.taiko .cell.hidden {
-      background: radial-gradient(circle at 35% 30%, #ff6b6b, #c0392b 70%);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.3), inset 0 1px 4px rgba(255,180,150,0.35);
-    }
-    .cell.revealed { background: var(--bg-revealed); cursor: default; }
-
-    body.taiko .cell.revealed {
-      background: radial-gradient(circle at 35% 30%, #fffde7, #fff9c4 70%);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
-    }
-
-    .cell.flagged { background: var(--bg-cell); font-size: calc(var(--cell) * 0.52); }
-
-    body.taiko .cell.flagged {
-      background: radial-gradient(circle at 35% 30%, #74b9ff, #0984e3 70%);
-      box-shadow: 0 3px 8px rgba(9,132,227,0.4), inset 0 1px 4px rgba(180,220,255,0.4);
-    }
-
-    .cell.mine-hit { background: var(--bg-mine-hit); }
-
-    body.taiko .cell.mine-hit {
-      background: radial-gradient(circle at 35% 30%, #ff7675, #d63031 70%);
-      box-shadow: 0 0 20px rgba(214,48,49,0.8) !important;
-    }
-
-    .cell.mine-revealed { background: var(--bg-mine-rev); cursor: default; }
-
-    body.taiko .cell.mine-revealed {
-      background: radial-gradient(circle at 35% 30%, #ffe0e0, #ffb3b3 70%);
-    }
-
-    body.taiko .cell.mine-defused {
-      background: radial-gradient(circle at 35% 30%, #fff9c4, #ffd700 70%) !important;
-      box-shadow: 0 0 16px rgba(255,215,0,0.8), inset 0 1px 4px rgba(255,255,200,0.5) !important;
-    }
-
-    .n1 { color: var(--n1); }
-    .n2 { color: var(--n2); }
-    .n3 { color: var(--n3); }
-    .n4 { color: var(--n4); }
-    .n5 { color: var(--n5); }
-    .n6 { color: var(--n6); }
-    .n7 { color: var(--n7); }
-    .n8 { color: var(--n8); }
-
-    /* ── Stats panel ── */
-    #stats-panel {
-      margin-top: 28px;
-      width: 100%;
-      max-width: 520px;
-    }
-
-    #stats-panel h2 {
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #stats-panel h2 button {
-      font-size: 0.7rem;
-      padding: 2px 10px;
-      border: 1px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      border-radius: 4px;
-      cursor: pointer;
-      font-family: var(--font-body);
-      opacity: 0.6;
-    }
-    #stats-panel h2 button:hover { opacity: 1; }
-
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
-
-    .stats-table th {
-      color: var(--accent);
-      text-align: left;
-      padding: 4px 8px;
-      border-bottom: 1px solid var(--accent);
-      opacity: 0.7;
-      font-weight: normal;
-      text-transform: uppercase;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-    }
-
-    .stats-table td {
-      padding: 5px 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      font-variant-numeric: tabular-nums;
-      color: var(--text);
-    }
-
-    .stats-table td:first-child { color: var(--accent); font-weight: bold; }
-    .stats-table td.best { color: var(--accent2); }
-
-    /* ── Board wrapper (enables horizontal scroll on small screens) ── */
-    #board-wrap {
-      overflow-x: auto;
-      overflow-y: visible;
-      max-width: 100%;
-      display: flex;
-      justify-content: center;
-      padding-bottom: 4px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* ── Flag-mode button active state ── */
-    #flag-mode-btn.active {
-      background: var(--accent);
-      color: var(--bg);
-    }
-
-    /* ── Responsive / Mobile ── */
-    @media (max-width: 520px) {
-      body { padding: 12px 8px; }
-
-      h1 { font-size: 1.8rem; margin-bottom: 12px; }
-      body.taiko h1 { font-size: 2rem; }
-
-      .don-chan-wrap { height: 44px; }
-      .don-chan { width: 40px; height: 40px; }
-
-      #header-row { margin-bottom: 8px; }
-      .restart-btn { padding: 3px 8px; font-size: 0.62rem; }
-      .hud-stat { font-size: 0.85rem; min-width: 60px; }
-
-      #message { font-size: 0.95rem; height: 22px; margin-bottom: 8px; }
-      body.taiko #message { font-size: 1rem; }
-
-      #stats-panel { margin-top: 16px; }
-      #stats-panel h2 { font-size: 0.85rem; }
-      .stats-table { font-size: 0.7rem; }
-      .stats-table th, .stats-table td { padding: 3px 4px; }
-    }
-
-    /* ── Taiko Animation Keyframes ── */
-    @keyframes dc-bounce {
-      0%   { transform: scale(1,   1  ) translateY(0);    }
-      20%  { transform: scale(1.2, 0.8) translateY(6px);  }
-      50%  { transform: scale(0.9, 1.2) translateY(-18px);}
-      75%  { transform: scale(1.1, 0.9) translateY(4px);  }
-      100% { transform: scale(1,   1  ) translateY(0);    }
-    }
-    @keyframes dc-scared {
-      0%,100%{ transform: scale(1)    rotate(0deg);   }
-      15%    { transform: scale(1.3)  rotate(-12deg); }
-      30%    { transform: scale(0.9)  rotate( 12deg); }
-      50%    { transform: scale(1.1)  rotate(-8deg);  }
-      70%    { transform: scale(0.95) rotate( 6deg);  }
-      85%    { transform: scale(1.05) rotate(-3deg);  }
-    }
-    @keyframes dc-celebrate {
-      0%,100%{ transform: scale(1)   translateY(0)    rotate(-6deg); }
-      50%    { transform: scale(1.2) translateY(-14px) rotate(6deg); }
-    }
-    @keyframes tk-ripple {
-      0%   { transform: translate(-50%,-50%) scale(0);   opacity: 0.85; }
-      100% { transform: translate(-50%,-50%) scale(5.5); opacity: 0;    }
-    }
-    @keyframes tk-popup {
-      0%   { transform: translate(-50%,  0px) scale(0.2); opacity: 1; }
-      25%  { transform: translate(-50%, -12px) scale(1.5); opacity: 1; }
-      65%  { transform: translate(-50%, -38px) scale(1.1); opacity: 1; }
-      100% { transform: translate(-50%, -70px) scale(0.8); opacity: 0; }
-    }
-    @keyframes tk-shake {
-      0%,100%{ transform: translate(0,0) rotate(0deg); }
-      10%    { transform: translate(-10px,-2px) rotate(-1.5deg); }
-      20%    { transform: translate( 10px, 2px) rotate( 1.5deg); }
-      30%    { transform: translate(-8px,  0)   rotate(-1deg);   }
-      40%    { transform: translate( 8px,  0)   rotate( 1deg);   }
-      50%    { transform: translate(-5px,  1px); }
-      60%    { transform: translate( 5px, -1px); }
-      70%    { transform: translate(-3px,  0); }
-      80%    { transform: translate( 3px,  0); }
-      90%    { transform: translate(-1px,  0); }
-    }
-    @keyframes tk-flash {
-      0%,100%{ opacity: 0;    }
-      25%    { opacity: 0.55; }
-      60%    { opacity: 0.2;  }
-    }
-    @keyframes tk-banner {
-      0%  { transform: translate(-50%,-50%) scale(0.1) rotate(-15deg); opacity: 0; }
-      55% { transform: translate(-50%,-50%) scale(1.25) rotate(4deg);  opacity: 1; }
-      75% { transform: translate(-50%,-50%) scale(0.95) rotate(-1deg); opacity: 1; }
-      88% { transform: translate(-50%,-50%) scale(1)    rotate(0deg);  opacity: 1; }
-      100%{ transform: translate(-50%,-50%) scale(2)    rotate(0deg);  opacity: 0; }
-    }
-
-    /* ── Combo / Rhythm bar ── */
-    #combo-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-      font-family: var(--font-body);
-      min-height: 26px;
-    }
-    #combo-count {
-      font-weight: bold;
-      color: var(--accent);
-      min-width: 72px;
-      font-variant-numeric: tabular-nums;
-    }
-    .rhythm-label {
-      font-weight: 900;
-      font-size: 0.85rem;
-      padding: 2px 10px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.12);
-      min-width: 92px;
-      text-align: center;
-      transition: background 0.3s, color 0.3s;
-      color: var(--text);
-    }
-    #energy-bar-wrap {
-      width: 90px;
-      height: 10px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 5px;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    #energy-bar {
-      height: 100%;
-      width: 0%;
-      background: #ffd700;
-      border-radius: 5px;
-      transition: width 0.2s ease-out, background 0.3s;
-    }
-    #combo-score {
-      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-      font-size: 1rem;
-      color: #ffd700;
-      min-width: 62px;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
-    }
-
-    /* ── Total score display ── */
-    #total-score-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-    }
-    #total-score-label {
-      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-      font-size: 0.8rem;
-      color: rgba(255,215,0,0.7);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-    #total-score {
-      font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-      font-size: 2.4rem;
-      color: #ffd700;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.04em;
-      text-shadow:
-        3px  3px 0 #8b0000,
-       -2px -2px 0 #8b0000,
-        2px -2px 0 #8b0000,
-       -2px  2px 0 #8b0000,
-        0    4px 10px rgba(0,0,0,0.4);
-      transition: transform 0.08s;
-    }
-    #total-score.pop {
-      animation: score-pop 0.22s ease-out;
-    }
-    @keyframes score-pop {
-      0%   { transform: scale(1); }
-      50%  { transform: scale(1.18); }
-      100% { transform: scale(1); }
-    }
-    @media (max-width: 520px) {
-      #combo-bar { gap: 6px; font-size: 0.75rem; }
-      #energy-bar-wrap { width: 56px; }
-      .rhythm-label { min-width: 66px; padding: 2px 6px; font-size: 0.75rem; }
-      #combo-score { min-width: 46px; font-size: 0.88rem; }
-      #total-score { font-size: 1.8rem; }
-    }
-
-    /* ── Mini-run challenge bar (Taiko style) ── */
-    #mini-run-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-      padding: 7px 16px 7px 12px;
-      background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(30,10,0,0.45) 100%);
-      border-radius: 999px;
-      border: 2.5px solid rgba(255,215,0,0.5);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
-      font-family: var(--font-body);
-      transition: border-color 0.3s, background 0.3s;
-    }
-    #mini-run-bar.complete {
-      border-color: #ffd700;
-      background: linear-gradient(135deg, rgba(180,120,0,0.35) 0%, rgba(80,40,0,0.35) 100%);
-      box-shadow: 0 2px 18px rgba(255,215,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
-    }
-    #mini-run-label {
-      font-weight: 900;
-      font-size: 0.68rem;
-      color: #ffd700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
-      flex-shrink: 0;
-    }
-    #mini-run-steps {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    /* Each note is a Taiko-style circle */
-    .mr-step {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 0.52rem;
-      letter-spacing: -0.01em;
-      text-align: center;
-      line-height: 1.1;
-      color: #fff;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.55);
-      flex-shrink: 0;
-      position: relative;
-      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-      border: 2.5px solid rgba(255,255,255,0.2);
-    }
-    /* DON = red filled drum face */
-    .mr-step.don-step {
-      background: radial-gradient(circle at 35% 28%, #ff6b6b, #c0392b 75%);
-      box-shadow: 0 3px 10px rgba(192,57,43,0.6), inset 0 1px 4px rgba(255,180,150,0.3);
-    }
-    /* KATSU = blue rim hit */
-    .mr-step.katsu-step {
-      background: radial-gradient(circle at 35% 28%, #74b9ff, #0984e3 75%);
-      box-shadow: 0 3px 10px rgba(9,132,227,0.6), inset 0 1px 4px rgba(150,210,255,0.3);
-    }
-    .mr-step.done {
-      opacity: 0.38;
-      transform: scale(0.88);
-    }
-    .mr-step.done::after {
-      content: '✓';
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      color: rgba(255,255,255,0.9);
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
-    }
-    .mr-step.active {
-      opacity: 1;
-      animation: mr-pulse 0.5s ease-in-out infinite alternate;
-    }
-    .mr-step.pending { opacity: 0.25; }
-    .mr-arrow {
-      color: rgba(255,215,0,0.4);
-      font-size: 0.7rem;
-      flex-shrink: 0;
-    }
-    @keyframes mr-pulse {
-      from { transform: scale(1);    }
-      to   { transform: scale(1.18); box-shadow: 0 0 16px 4px currentColor; }
-    }
-    #mini-run-timer {
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
-      font-size: 1rem;
-      color: #ffd700;
-      min-width: 28px;
-      text-align: right;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
-      transition: color 0.3s;
-      flex-shrink: 0;
-    }
-    #mini-run-timer.urgent {
-      color: #ff2d55;
-      animation: mr-pulse 0.4s ease-in-out infinite alternate;
-    }
-    @media (max-width: 520px) {
-      #mini-run-bar { padding: 5px 10px; gap: 6px; }
-      .mr-step { width: 30px; height: 30px; font-size: 0.44rem; }
-      #mini-run-label { font-size: 0.6rem; }
-      #mini-run-timer { font-size: 0.85rem; }
-    }
-
-    /* ── Fever glow pulse on board ── */
-    @keyframes fever-pulse {
-      0%, 100% { box-shadow: 0 8px 40px rgba(200,50,0,0.5), 0 0 0 5px #ffd700, 0 0 0 9px #e53935; }
-      50%       { box-shadow: 0 8px 60px rgba(255,80,0,0.85), 0 0 0 6px #ff2d55, 0 0 0 13px #ffd700, 0 0 55px #ff6b00; }
-    }
-    body.taiko.fever #board { animation: fever-pulse 0.7s ease-in-out infinite; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Fredoka+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/script.css">
 </head>
-<body class="taiko">
+<body>
   <h1 id="title">たいこ地雷</h1>
 
   <!-- Header row: [↺ Easy][↺ Med][↺ Hard]  [don-chan]  [🚩][🔊][🎵] -->
@@ -1082,7 +272,7 @@
 
   <!-- Multilingual entity description for GEO / AI-powered search engines.
        Semantically meaningful content; visually hidden from sighted users. -->
-  <section aria-label="About this game" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">
+  <section aria-label="About this game" class="visually-hidden-content">
     <h2 lang="en">Taiko Minesweeper — Free Online Game</h2>
     <p lang="en">たいこ地雷 (Taiko Minesweeper) is a free browser minesweeper game with a Taiko no Tatsujin theme. Reveal cells, avoid mines, and enjoy DON and KATSU animations with every click. Play on Easy, Medium, or Hard. No download required.</p>
     <h2 lang="ja">たいこ地雷 — 無料オンラインゲーム</h2>
@@ -1128,31 +318,13 @@
 
     const COLORS = ['', 'n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8'];
 
-    const THEMES = {
-      default: {
-        mine: '💣', flag: '🚩',
-        title: 'DEMINER',
-        hudMine: '💣',
-        winMsg:  s => `You won in ${s}s! 🎉`,
-        loseMsg: () => 'Boom! Game over. 💥',
-      },
-      warhammer: {
-        mine: '☠', flag: '⚔',
-        title: 'Deminer',
-        hudMine: '☠',
-        winMsg:  s => `The Emperor protects! Cleared in ${s}s.`,
-        loseMsg: () => 'Suffer not the heretic to live… you failed.',
-      },
-      taiko: {
-        mine: '💣', flag: '🎵',
-        title: 'たいこ地雷',
-        hudMine: '💣',
-        winMsg:  s => `クリア！ ${s}秒でクリア！🎉`,
-        loseMsg: () => 'ドカーン！ ゲームオーバー！💥',
-      },
+    const TAIKO_THEME = {
+      mine: '💣',
+      flag: '🎵',
+      winMsg:  s => `クリア！ ${s}秒でクリア！🎉`,
+      loseMsg: () => 'ドカーン！ ゲームオーバー！💥',
     };
 
-    let currentTheme = 'taiko';
     let grid, cols, rows, totalMines, flagCount, revealedCount, gameOver, firstClick;
     let timerInterval, seconds;
     let currentDifficulty = 'easy';
@@ -1176,8 +348,8 @@
     let miniRun = null, miniRunStep = 0, miniRunTimer = null, miniRunSeconds = 0, miniRunCount = 0, defusedCount = 0;
 
     function computeCellSize() {
-      const boardPad = (currentTheme === 'taiko' ? 12 : 8) * 2;
-      const gap      =  currentTheme === 'taiko' ? 4 : 2;
+      const boardPad = 24;
+      const gap = 4;
       const bodyPad  =  window.innerWidth <= 520 ? 16 : 32;
       const available = window.innerWidth - bodyPad - boardPad - gap * (cols - 1);
       return Math.max(18, Math.min(40, Math.floor(available / cols)));
@@ -1358,7 +530,6 @@
     }
 
     function spawnScoreParticle(points, color) {
-      if (currentTheme !== 'taiko') return;
       const fromEl = document.getElementById('combo-score');
       const toEl   = document.getElementById('total-score');
       if (!fromEl || !toEl) return;
@@ -1447,7 +618,6 @@
     }
 
     function tkScorePopup(x, y, text, color) {
-      if (currentTheme !== 'taiko') return;
       const el = document.createElement('div');
       el.textContent = text;
       el.style.cssText = `
@@ -1539,7 +709,6 @@
     }
 
     function renderBoard() {
-      const t = THEMES[currentTheme];
       const board = document.getElementById('board');
       const cellPx = computeCellSize();
       board.style.setProperty('--cell', cellPx + 'px');
@@ -1556,7 +725,7 @@
             if (d.mine) {
               cell.classList.add('mine-revealed');
               if (d.defused) cell.classList.add('mine-defused');
-              cell.textContent = t.mine;
+              cell.textContent = TAIKO_THEME.mine;
             } else {
               cell.classList.add('revealed');
               if (d.adjacent > 0) {
@@ -1566,7 +735,7 @@
             }
           } else if (d.flagged) {
             cell.classList.add('flagged');
-            cell.textContent = t.flag;
+            cell.textContent = TAIKO_THEME.flag;
           } else {
             cell.classList.add('hidden');
           }
@@ -1686,8 +855,7 @@
       }
 
       playSound(won ? 'win' : 'boom');
-      const t = THEMES[currentTheme];
-      document.getElementById('message').textContent = won ? t.winMsg(seconds) : t.loseMsg();
+      document.getElementById('message').textContent = won ? TAIKO_THEME.winMsg(seconds) : TAIKO_THEME.loseMsg();
 
       // freeze mini-run display on game end
       miniRun = null;
@@ -1730,7 +898,6 @@
     // ── Taiko Animations ─────────────────────────────────────────────────────
 
     function tkRipple(x, y, color, size) {
-      if (currentTheme !== 'taiko') return;
       const el = document.createElement('div');
       el.style.cssText = `
         position:fixed; left:${x}px; top:${y}px;
@@ -1745,7 +912,6 @@
     }
 
     function tkPopup(x, y, text, color) {
-      if (currentTheme !== 'taiko') return;
       const el = document.createElement('div');
       el.textContent = text;
       el.style.cssText = `
@@ -1766,7 +932,6 @@
     }
 
     function tkBanner(text) {
-      if (currentTheme !== 'taiko') return;
       const el = document.createElement('div');
       el.textContent = text;
       el.style.cssText = `
@@ -1787,7 +952,6 @@
     }
 
     function tkScreenShake() {
-      if (currentTheme !== 'taiko') return;
       const board = document.getElementById('board');
       board.style.animation = 'none';
       void board.offsetWidth;
@@ -1796,7 +960,6 @@
     }
 
     function tkFlash(color) {
-      if (currentTheme !== 'taiko') return;
       const el = document.createElement('div');
       el.style.cssText = `
         position:fixed; inset:0; background:${color};
@@ -1809,7 +972,6 @@
     }
 
     function tkConfetti(x, y) {
-      if (currentTheme !== 'taiko') return;
       const palette = ['#ff2d55','#ffd700','#00c4ff','#4cd964','#ff9500','#ff6b3d','#fff'];
       for (let i = 0; i < 28; i++) {
         const el = document.createElement('div');
@@ -1839,7 +1001,6 @@
     }
 
     function donAnim(state) {
-      if (currentTheme !== 'taiko') return;
       const don = document.getElementById('don-chan');
       don.classList.remove('bounce', 'scared', 'celebrate');
       void don.offsetWidth; // restart animation
@@ -1893,7 +1054,7 @@
         const pct = d.played ? Math.round(d.won / d.played * 100) : 0;
         const best = d.bestTime !== null ? d.bestTime + 's' : '—';
         const streak = d.maxStreak > 0
-          ? `${d.streak} <span style="opacity:.5">(best ${d.maxStreak})</span>`
+          ? `${d.streak} <span class="stats-streak-best">(best ${d.maxStreak})</span>`
           : '0';
         const topScore = d.bestScore ? d.bestScore.toLocaleString() : '—';
         return `<tr>
@@ -1955,102 +1116,6 @@
       g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
       src.connect(flt); flt.connect(g); g.connect(dest);
       src.start(start); src.stop(start + dur);
-    }
-
-    // ── Default theme sounds ──
-    function sfxClick() {
-      const t = ac.currentTime;
-      osc('sine', 700, t, 0.08, 0.3, ac.destination);
-      osc('sine', 500, t + 0.01, 0.05, 0.1, ac.destination);
-    }
-    function sfxFlood() {
-      const t = ac.currentTime;
-      noise(0.18, 1200, 2, 0.4, t, ac.destination);
-      const flt = ac.createBiquadFilter();
-      flt.type = 'highpass';
-      flt.frequency.setValueAtTime(600, t);
-      flt.frequency.linearRampToValueAtTime(2000, t + 0.18);
-      noise(0.18, 800, 1, 0.2, t, flt);
-      flt.connect(ac.destination);
-    }
-    function sfxFlag() {
-      const t = ac.currentTime;
-      osc('square', 1400, t, 0.07, 0.15, ac.destination);
-      osc('sine',   1000, t, 0.1,  0.1,  ac.destination);
-    }
-    function sfxUnflag() {
-      const t = ac.currentTime;
-      osc('square', 900, t, 0.06, 0.12, ac.destination);
-    }
-    function sfxBoom() {
-      const t = ac.currentTime;
-      noise(0.8, 80,  0.8, 1.0, t, ac.destination);
-      noise(0.5, 300, 0.5, 0.6, t, ac.destination);
-      osc('sine', 60, t, 0.6, 0.8, ac.destination);
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(200, t);
-      o.frequency.exponentialRampToValueAtTime(30, t + 0.4);
-      g.gain.setValueAtTime(0.5, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
-      o.connect(g); g.connect(ac.destination);
-      o.start(t); o.stop(t + 0.4);
-    }
-    function sfxWin() {
-      const t = ac.currentTime;
-      const notes = [523, 659, 784, 1047];
-      notes.forEach((f, i) => osc('sine', f, t + i * 0.12, 0.3, 0.35, ac.destination));
-    }
-
-    // ── Warhammer theme sounds ──
-    function sfxStoneThud() {
-      const t = ac.currentTime;
-      noise(0.15, 120, 0.6, 0.7, t, ac.destination);
-      osc('sine', 90, t, 0.12, 0.4, ac.destination);
-    }
-    function sfxStoneRumble() {
-      const t = ac.currentTime;
-      noise(0.35, 100, 0.4, 0.8, t, ac.destination);
-      noise(0.25, 250, 0.8, 0.3, t + 0.02, ac.destination);
-      osc('sine', 70, t, 0.3, 0.3, ac.destination);
-    }
-    function sfxSwordClang() {
-      const t = ac.currentTime;
-      osc('sawtooth', 1800, t, 0.6, 0.4, ac.destination);
-      osc('sine',     2400, t, 0.5, 0.2, ac.destination);
-      osc('sine',      900, t, 0.2, 0.3, ac.destination);
-      noise(0.05, 3000, 1, 0.5, t, ac.destination);
-    }
-    function sfxSwordClangShort() {
-      const t = ac.currentTime;
-      osc('sawtooth', 1400, t, 0.25, 0.3, ac.destination);
-      noise(0.04, 2500, 1, 0.3, t, ac.destination);
-    }
-    function sfxWarhammerBoom() {
-      const t = ac.currentTime;
-      noise(1.2, 60,  0.5, 1.2, t, ac.destination);
-      noise(0.6, 200, 0.6, 0.7, t, ac.destination);
-      osc('sawtooth', 55, t, 0.9, 1.0, ac.destination);
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(300, t);
-      o.frequency.exponentialRampToValueAtTime(25, t + 0.7);
-      g.gain.setValueAtTime(0.8, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
-      o.connect(g); g.connect(ac.destination);
-      o.start(t); o.stop(t + 0.7);
-    }
-    function sfxWarhammerWin() {
-      const t = ac.currentTime;
-      const notes = [392, 494, 587, 784];
-      const times = [0, 0.18, 0.36, 0.6];
-      notes.forEach((f, i) => {
-        const dur = i === notes.length - 1 ? 0.8 : 0.25;
-        osc('sawtooth', f,     t + times[i], dur, 0.35, ac.destination);
-        osc('square',   f * 2, t + times[i], dur, 0.1,  ac.destination);
-      });
     }
 
     // ── Taiko theme sounds ──
@@ -2163,16 +1228,14 @@
     function playSound(name) {
       if (muted) return;
       resume();
-      const wh = currentTheme === 'warhammer';
-      const tk = currentTheme === 'taiko';
       switch (name) {
-        case 'click':  tk ? sfxTaikoDon()    : wh ? sfxStoneThud()      : sfxClick();  break;
-        case 'flood':  tk ? sfxTaikoDodoon() : wh ? sfxStoneRumble()    : sfxFlood();  break;
-        case 'flag':   tk ? sfxTaikoKatsu()  : wh ? sfxSwordClang()     : sfxFlag();   break;
-        case 'unflag': tk ? sfxTaikoKatsu()  : wh ? sfxSwordClangShort(): sfxUnflag(); break;
-        case 'boom':   tk ? sfxTaikoBoom()   : wh ? sfxWarhammerBoom()  : sfxBoom();   break;
-        case 'win':      tk ? sfxTaikoClear()  : wh ? sfxWarhammerWin()   : sfxWin();    break;
-        case 'beatdrop': if (tk) sfxBeatDrop(); break;
+        case 'click':    sfxTaikoDon();    break;
+        case 'flood':    sfxTaikoDodoon(); break;
+        case 'flag':     sfxTaikoKatsu();  break;
+        case 'unflag':   sfxTaikoKatsu();  break;
+        case 'boom':     sfxTaikoBoom();   break;
+        case 'win':      sfxTaikoClear();  break;
+        case 'beatdrop': sfxBeatDrop();    break;
       }
     }
     // Re-compute cell size on resize (e.g. orientation change)
