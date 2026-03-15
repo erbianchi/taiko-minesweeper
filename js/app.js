@@ -933,7 +933,7 @@ window.addEventListener('resize', () => {
 });
 
 // ── Background Music ──────────────────────────────────────────────────────
-const bgMusic = new Audio(`music/music${Math.floor(Math.random() * 4) + 1}.mp3`);
+const bgMusic = new Audio(`music/music${Math.floor(Math.random() * 6) + 1}.mp3`);
 bgMusic.loop = true;
 bgMusic.volume = 0.2; // kept low so game sounds stay louder
 
