@@ -1,14 +1,10 @@
-# Taiko Minesweeper (たいこ地雷)
+# たいこ地雷 — Taiko Minesweeper
 
-Taiko Minesweeper is a browser-based Minesweeper game with a Taiko no Tatsujin-inspired presentation. The current playable implementation in this repository lives in `index.html` and uses inline JavaScript, CSS, Web Audio sound effects, and local background music files.
-
-Note: repository metadata still mentions a Python version in `game.py`, but `game.py` is currently empty in this checkout. This README documents the game that is actually implemented.
+A browser-based Minesweeper game with a Taiko no Tatsujin-inspired presentation: Don-chan animations, taiko drum sounds, rhythm combos, and progressive level system.
 
 ## Running
 
-No build step is required.
-
-Open `index.html` directly in a browser, or serve the folder as a static site:
+No build step required. Open `index.html` directly in a browser, or serve as a static site:
 
 ```bash
 python -m http.server
@@ -16,77 +12,106 @@ python -m http.server
 
 Then open `http://localhost:8000`.
 
-## Game Details
+## Repository Structure
 
-- Theme: Taiko no Tatsujin-inspired visual style with Don-chan animations and Japanese taiko hit callouts.
-- Platform: desktop and mobile web browser.
-- Difficulty levels:
-  - Easy: `9 x 9` board with `10` mines
-  - Medium: `16 x 16` board with `40` mines
-  - Hard: `30 x 16` board with `99` mines
-- HUD elements:
-  - Mines remaining counter
-  - Timer
-  - Total score
-  - Combo / rhythm meter
-  - Mini-run sequence bar
-  - End-of-game message
-  - Persistent statistics table
-- Audio:
-  - Synthesized sound effects generated with the Web Audio API
-  - Random looping background music chosen from `music/music1.mp3` to `music/music4.mp3`
-  - Separate mute buttons for sound effects and music
-- Persistence:
-  - Per-difficulty stats are stored in `localStorage`
-  - Tracked stats: played, wins, win rate, best time, streak / best streak, best score
-- Responsive behavior:
-  - Board cell size is recalculated from screen width
-  - Mobile-friendly flag mode button is provided for touch devices
+```
+index.html       — game markup
+css/script.css   — all styles
+js/app.js        — all game logic, audio engine
+music/           — looping background music tracks (music1–4.mp3)
+game.py          — placeholder (unused)
+```
+
+## Gameplay
+
+### Level Progression
+
+The game has no fixed difficulty selection. It starts at **Level 1** and advances automatically:
+
+| Level | Board size | Mines (~15%) |
+|-------|-----------|--------------|
+| 1     | 7 × 7     | 7            |
+| 2     | 8 × 8     | 9            |
+| 3     | 9 × 9     | 12           |
+| …     | (6+N) × (6+N) | ~15%     |
+
+- Clearing the board advances to the next level with a full-screen level splash and drum fanfare.
+- Hitting a mine ends the game with a **ゲームオーバー** overlay and a crying Don-chan. The game restarts from Level 1.
+- On first load, a **たいこ地雷 / LEVEL 1** intro splash plays with a DON–DON–KA–DO-DON drum roll.
+
+### Rules
+
+1. Reveal all safe cells without clicking a mine.
+2. The first click is always safe — mines are placed outside the 3×3 area around it.
+3. A revealed number shows how many of the eight neighboring cells contain mines.
+4. Zero-mine cells auto-flood-reveal connected empty cells and their numbered borders.
+5. Flag cells you suspect contain mines.
 
 ## Controls
 
-- Click or tap a cell to reveal it.
-- Right-click a cell to place or remove a flag.
-- On touch devices, use the `🚩` button to toggle Flag Mode:
-  - Flag Mode ON: tapping places or removes a flag
-  - Flag Mode OFF: tapping reveals a cell
-- Use `↺ Easy`, `↺ Med`, `↺ Hard`, or `RESTART` to start a new game.
-- Use `🔊` to mute sound effects.
-- Use `🎵` to mute background music.
+| Action | Desktop | Mobile |
+|--------|---------|--------|
+| Reveal cell | Left-click | Tap |
+| Flag cell | Right-click | 🚩 + tap |
+| Toggle flag mode | — | 🚩 button |
+| Menu (restart / sound / music) | ⋮ button | ⋮ button |
 
-## Rules Of The Game
+## HUD
 
-1. Reveal safe cells without clicking a mine.
-2. The first click is always safe.
-3. The implementation goes further than standard Minesweeper: mines are not placed in the full `3 x 3` area centered on the first clicked cell.
-4. A revealed number shows how many mines are in the eight neighboring cells.
-5. If a revealed cell has `0` adjacent mines, the game automatically flood-reveals connected empty cells and their numbered border cells.
-6. Flag cells you think contain mines.
-7. Clicking a mine ends the game immediately.
-8. You win when all non-mine cells are revealed.
+- **SCORE** — total score, bounces and scales up on every increment
+- **Mines ●** — unflagged mines remaining
+- **⏱ timer** — elapsed seconds
+- **Mini-run bar** — current DON/KATSU sequence challenge with countdown timer; Don-chan animates on the right end
+- **Combo bar** — combo count, rhythm rank, energy bar, accumulated combo score
 
-## Scoring And Special Systems
+## Scoring
 
-- Revealing a normal safe cell adds a base `10` points.
-- Flagging a cell adds a base `5` points.
-- Large flood reveals award more base points because they score by revealed cell count.
-- Consecutive successful actions build combo.
-- Combo changes the rhythm rank and score multiplier:
-  - `–` at 1x
-  - `GOOD!` at 2x
-  - `GREAT!` at 3x
-  - `FEVER!` at 5x
-  - `DON FEVER!!` at 8x
-- The game generates random `DON` / `KATSU` mini-run sequences:
-  - Sequence length starts at 2 and grows up to 5
-  - The timer starts at 15 seconds when the first correct step is entered
-  - Completing a sequence grants `length x 50 x current multiplier`
-- Every time the animated total score crosses a `1000` point milestone, one random unrevealed and unflagged mine is automatically revealed as a safe, defused mine.
-- Winning grants a time bonus:
-  - `500 + max(0, 300 - 2 x seconds)`
+| Action | Points |
+|--------|--------|
+| Reveal safe cell | 10 base (× combo multiplier) |
+| Flood reveal | revealed cells × 10 base |
+| Correct flag (KATSU hit) | 5 base |
+| Complete mini-run sequence | length × 50 × multiplier |
+| Win time bonus | 500 + max(0, 300 − 2 × seconds) |
+| Score milestone (every 1 000 pts) | One random mine auto-defused |
 
-## Repository Structure
+Points are **only awarded when the action matches the current mini-run step** (DON click advances DON step, flag advances KATSU step).
 
-- `index.html`: main game UI, styling, and JavaScript game logic
-- `music/`: looping background music tracks
-- `game.py`: currently empty placeholder
+### Combo & Rhythm Ranks
+
+| Combo | Rank | Multiplier |
+|-------|------|-----------|
+| 0     | –    | 1×        |
+| 5     | GOOD! | 2×       |
+| 10    | GREAT! | 3×      |
+| 20    | FEVER! | 5×      |
+| 35    | DON FEVER!! | 8× |
+
+Combo resets to 0 when the mini-run timer expires.
+
+### Mini-Run Sequences
+
+- Random DON / KATSU sequences, length 2–5.
+- The 15-second countdown starts on the first correct step.
+- Completing a sequence instantly generates the next one.
+- A wrong step or timer expiry resets the combo and generates a new sequence.
+
+## Audio
+
+All sounds are synthesized with the **Web Audio API** (no external sound files required):
+
+| Sound | Trigger |
+|-------|---------|
+| DON (deep taiko center hit) | Reveal a cell |
+| KATSU (rim hit — sharp crack + mid punch) | Flag a cell |
+| DO-DON (double hit) | Large flood reveal |
+| Beat Drop | Reaching a new rhythm rank |
+| Clear fanfare | Completing a level |
+| Boom | Hitting a mine |
+
+Background music loops randomly from `music/music1–4.mp3`. Sound effects and music have independent mute controls in the ⋮ menu.
+
+## Responsive Design
+
+- Mobile (< 521 px): full-viewport app shell, fluid cell sizes via `clamp()`
+- Desktop (≥ 521 px): HUD spans full width, game content centered at max 520 px, scrollable page

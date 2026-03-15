@@ -19,37 +19,56 @@
   --n5: #e65100; --n6: #00695c; --n7: #ad1457; --n8: #37474f;
 }
 
+html, body { height: 100%; }
 body {
   color: var(--text);
   font-family: var(--font-body);
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  padding: 24px 16px;
+  min-height: 100%;
+  padding: 0;
   background: linear-gradient(150deg, #ffb74d 0%, #ff6d00 45%, #e64a19 100%);
   background-attachment: fixed;
 }
 
-h1 {
-  font-size: 3rem;
-  letter-spacing: 0.2em;
-  margin-bottom: 20px;
-  color: #fff;
-  font-family: var(--font-title);
-  text-shadow: var(--title-shadow);
-  transition: all 0.3s;
+h1 { display: none; }
+
+/* ── App shell ── */
+/* Mobile: lock to viewport height, board fills remaining space */
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  height: 100svh;
+  overflow: hidden;
 }
 
-h1::before { content: '🥁 '; }
-h1::after  { content: ' 🥁'; }
+/* Desktop: let content size naturally, HUD spans full width, game content stays centered */
+@media (min-width: 521px) {
+  body { padding: 0; overflow-y: auto; }
+  #app { height: auto; overflow: visible; max-width: 100%; }
+  #hud { padding: 8px 24px; }
+  #board-wrap { flex: 0 0 auto; padding: 12px 0; max-width: 520px; width: 100%; align-self: center; }
+  #mini-run-bar { max-width: 520px; width: 100%; align-self: center; }
+  #combo-bar { max-width: 520px; width: 100%; align-self: center; }
+  #stats-panel { margin-top: 24px; max-width: 520px; width: 100%; align-self: center; }
+}
 
-/* ── Don-chan mascot ── */
-.don-chan-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 56px;
+/* ── Don-chan inline in mini-run-bar ── */
+#don-chan-overlay {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+  margin-left: auto;
+}
+#don-chan-overlay.visible { opacity: 1; }
+#don-chan-overlay .don-chan {
+  width: clamp(26px, 8vw, 38px);
+  height: clamp(26px, 8vw, 38px);
+  display: block;
 }
 
 .don-chan {
@@ -63,30 +82,6 @@ h1::after  { content: ' 🥁'; }
 .don-chan.scared   { animation: dc-scared   0.55s ease-out; }
 .don-chan.celebrate{ animation: dc-celebrate 0.7s ease-in-out infinite; }
 
-/* ── Restart button (replaces combo bar on game over) ── */
-#restart-btn {
-  display: none;
-  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-  font-size: 1.6rem;
-  font-weight: 900;
-  color: #ffd700;
-  background: #e53935;
-  border: none;
-  border-radius: 12px;
-  padding: 4px 28px;
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow: 3px 3px 0 #8b0000, 0 0 14px rgba(229,57,53,0.5);
-  text-shadow: 1px 1px 0 #8b0000, -1px -1px 0 #8b0000;
-  margin-bottom: 10px;
-  animation: restart-pop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-}
-#restart-btn:hover { background: #ff5252; box-shadow: 3px 3px 0 #8b0000, 0 0 20px rgba(229,57,53,0.9); }
-@keyframes restart-pop {
-  0%   { transform: scale(0); opacity: 0; }
-  70%  { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
-}
 
 /* ── Don-chan face animations ── */
 @keyframes dc-blink {
@@ -178,95 +173,112 @@ h1::after  { content: ' 🥁'; }
 }
 .don-chan.cry .dc-tear-r { animation-delay: 0.3s; }
 
-/* ── Header row: [diff-left] [don-chan] [util-btns] ── */
-#header-row {
+/* ── HUD: compact single row ── */
+#hud {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  width: 100%;
-  max-width: 520px;
-  margin-bottom: 10px;
-  opacity: 0.65;
-  transition: opacity 0.25s;
+  padding: 6px 12px;
+  background: rgba(0,0,0,0.25);
+  position: relative;
+  flex-shrink: 0;
 }
-#header-row:hover { opacity: 1; }
-
-#diff-left {
+#hud-left, #hud-right {
   display: flex;
   align-items: center;
-  gap: 5px;
-  justify-self: start;
+  gap: 8px;
 }
-
-#header-row #util-btns {
-  justify-self: end;
+#hud-right { justify-content: flex-end; }
+.hud-mines, .hud-timer {
+  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.8);
 }
-
-.restart-btn {
-  padding: 5px 11px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.25);
-  color: rgba(255,255,255,0.65);
-  border-radius: 14px;
+.hud-mines span, .hud-timer span { color: #ffd700; }
+#flag-mode-btn {
+  width: 28px; height: 28px;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center;
+}
+#flag-mode-btn.active { background: var(--accent); color: var(--bg); }
+#controls-toggle {
+  width: 28px; height: 28px;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.8);
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+#controls-toggle:hover { background: rgba(255,255,255,0.22); }
+#controls-panel {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  z-index: 200;
+  grid-column: 1 / -1;
+  background: rgba(30,10,0,0.92);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 10px;
+  padding: 6px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+#controls-panel.open { display: flex; }
+.ctrl-btn {
+  padding: 6px 12px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.8rem;
   font-family: var(--font-body);
   font-weight: bold;
-  transition: all 0.15s;
-  white-space: nowrap;
+  text-align: left;
+  transition: background 0.12s;
 }
-.restart-btn:hover { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.35); }
+.ctrl-btn:hover { background: rgba(255,215,0,0.18); color: #ffd700; }
 
-#util-btns {
+/* ── Total score display (centered in HUD grid) ── */
+#total-score-wrap {
   display: flex;
-  gap: 5px;
-}
-#util-btns button {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: rgba(0,0,0,0.22);
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 0.82rem;
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  transition: opacity 0.15s, background 0.15s;
-  font-family: var(--font-body);
 }
-#util-btns button:hover { background: rgba(255,255,255,0.18); }
-#util-btns button.active { background: var(--accent); color: var(--bg); }
-
-/* ── Score HUD: mines | SCORE | timer ── */
-#score-hud {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  width: 100%;
-  max-width: 520px;
-  margin-bottom: 10px;
-}
-.hud-stat {
+#total-score-label {
   font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-  font-size: 1rem;
-  color: rgba(255,255,255,0.65);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-variant-numeric: tabular-nums;
+  font-size: 0.65rem;
+  color: rgba(255,215,0,0.7);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
-.hud-stat span { color: #ffd700; }
-.hud-stat.right { justify-self: end; }
+#total-score {
+  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+  font-size: 1.6rem;
+  color: #ffd700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 2px 2px 0 #8b0000, -1px -1px 0 #8b0000;
+  line-height: 1.1;
+}
 
 #message {
-  height: 28px;
-  font-size: 1.3rem;
-  margin-bottom: 12px;
+  font-size: 1rem;
   font-weight: bold;
   color: var(--accent2);
   font-family: var(--font-body);
   text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  margin-bottom: 6px;
+  min-height: 22px;
+  text-align: center;
 }
 
 #board {
@@ -405,14 +417,15 @@ h1::after  { content: ' 🥁'; }
 .stats-table td:first-child { color: var(--accent); font-weight: bold; }
 .stats-table td.best { color: var(--accent2); }
 
-/* ── Board wrapper (enables horizontal scroll on small screens) ── */
+/* ── Board wrapper (fills remaining flex space) ── */
 #board-wrap {
-  overflow-x: auto;
-  overflow-y: visible;
-  max-width: 100%;
+  flex: 1;
+  overflow: auto;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding-bottom: 4px;
+  padding: 8px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -422,25 +435,33 @@ h1::after  { content: ' 🥁'; }
   color: var(--bg);
 }
 
-/* ── Responsive / Mobile ── */
+/* ── Responsive ── */
+
+/* Fluid sizing via clamp (applies at all widths) */
+#total-score       { font-size: clamp(1.2rem, 5vw, 1.6rem); }
+.hud-mines,
+.hud-timer         { font-size: clamp(0.72rem, 3vw, 0.95rem); }
+.mr-step           { width: clamp(26px, 8vw, 38px); height: clamp(26px, 8vw, 38px); font-size: clamp(0.38rem, 1.4vw, 0.52rem); }
+
+/* Phones (≤ 520px) */
 @media (max-width: 520px) {
-  body { padding: 12px 8px; }
-
-  h1 { font-size: 2rem; margin-bottom: 12px; }
-
-  .don-chan-wrap { height: 44px; }
-  .don-chan { width: 40px; height: 40px; }
-
-  #header-row { margin-bottom: 8px; }
-  .restart-btn { padding: 3px 8px; font-size: 0.62rem; }
-  .hud-stat { font-size: 0.85rem; min-width: 60px; }
-
-  #message { font-size: 1rem; height: 22px; margin-bottom: 8px; }
+  #hud              { padding: 5px 10px; }
+  #mini-run-bar     { padding: 5px 10px; gap: 6px; margin-bottom: 4px; }
+  #mini-run-label   { font-size: 0.6rem; }
+  #mini-run-timer   { font-size: 0.85rem; }
 
   #stats-panel { margin-top: 16px; }
   #stats-panel h2 { font-size: 0.85rem; }
   .stats-table { font-size: 0.7rem; }
   .stats-table th, .stats-table td { padding: 3px 4px; }
+}
+
+/* Very small phones (≤ 375px) */
+@media (max-width: 375px) {
+  #hud              { padding: 4px 8px; }
+  #mini-run-bar     { padding: 4px 8px; gap: 4px; }
+  #mini-run-timer   { font-size: 0.75rem; }
+  .stats-table      { font-size: 0.62rem; }
 }
 
 /* ── Taiko Animation Keyframes ── */
@@ -502,36 +523,45 @@ h1::after  { content: ' 🥁'; }
 #combo-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: clamp(0.72rem, 2.5vw, 0.9rem);
   font-family: var(--font-body);
-  min-height: 26px;
+  min-height: 32px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 #combo-count {
   font-weight: bold;
   color: var(--accent);
-  min-width: 72px;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  flex-shrink: 1;
+  min-width: 0;
 }
 .rhythm-label {
   font-weight: 900;
-  font-size: 0.85rem;
-  padding: 2px 10px;
+  font-size: clamp(0.65rem, 2.2vw, 0.85rem);
+  padding: 2px 8px;
   border-radius: 12px;
   background: rgba(255,255,255,0.12);
-  min-width: 92px;
   text-align: center;
+  white-space: nowrap;
   transition: background 0.3s, color 0.3s;
   color: var(--text);
+  flex-shrink: 1;
+  min-width: 0;
 }
 #energy-bar-wrap {
-  width: 90px;
+  flex: 0 1 120px;
+  min-width: 40px;
+  max-width: 120px;
   height: 10px;
   background: rgba(0,0,0,0.3);
   border-radius: 5px;
   overflow: hidden;
-  flex-shrink: 0;
+  flex-shrink: 1;
 }
 #energy-bar {
   height: 100%;
@@ -542,63 +572,30 @@ h1::after  { content: ' 🥁'; }
 }
 #combo-score {
   font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-  font-size: 1rem;
+  font-size: clamp(0.82rem, 2.5vw, 1rem);
   color: #ffd700;
-  min-width: 62px;
+  white-space: nowrap;
   text-align: right;
   font-variant-numeric: tabular-nums;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  flex-shrink: 0;
 }
 
-/* ── Total score display ── */
-#total-score-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-#total-score-label {
-  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-  font-size: 0.8rem;
-  color: rgba(255,215,0,0.7);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-#total-score {
-  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-  font-size: 2.4rem;
-  color: #ffd700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  text-shadow:
-    3px  3px 0 #8b0000,
-   -2px -2px 0 #8b0000,
-    2px -2px 0 #8b0000,
-   -2px  2px 0 #8b0000,
-    0    4px 10px rgba(0,0,0,0.4);
-  transition: transform 0.08s;
-}
 #total-score.pop {
-  animation: score-pop 0.22s ease-out;
+  animation: score-pop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 @keyframes score-pop {
   0%   { transform: scale(1); }
-  50%  { transform: scale(1.18); }
+  30%  { transform: scale(1.45); }
+  65%  { transform: scale(0.92); }
   100% { transform: scale(1); }
 }
-@media (max-width: 520px) {
-  #combo-bar { gap: 6px; font-size: 0.75rem; }
-  #energy-bar-wrap { width: 56px; }
-  .rhythm-label { min-width: 66px; padding: 2px 6px; font-size: 0.75rem; }
-  #combo-score { min-width: 46px; font-size: 0.88rem; }
-  #total-score { font-size: 1.8rem; }
-}
-
 /* ── Mini-run challenge bar (Taiko style) ── */
 #mini-run-bar {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 10px;
   margin-bottom: 10px;
   padding: 7px 16px 7px 12px;
   background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(30,10,0,0.45) 100%);
@@ -607,6 +604,7 @@ h1::after  { content: ' 🥁'; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
   font-family: var(--font-body);
   transition: border-color 0.3s, background 0.3s;
+  flex-shrink: 0;
 }
 #mini-run-bar.complete {
   border-color: #ffd700;
@@ -711,13 +709,6 @@ h1::after  { content: ' 🥁'; }
   white-space: nowrap;
 }
 .stats-streak-best { opacity: 0.5; }
-@media (max-width: 520px) {
-  #mini-run-bar { padding: 5px 10px; gap: 6px; }
-  .mr-step { width: 30px; height: 30px; font-size: 0.44rem; }
-  #mini-run-label { font-size: 0.6rem; }
-  #mini-run-timer { font-size: 0.85rem; }
-}
-
 /* ── Fever glow pulse on board ── */
 @keyframes fever-pulse {
   0%, 100% { box-shadow: 0 8px 40px rgba(200,50,0,0.5), 0 0 0 5px #ffd700, 0 0 0 9px #e53935; }
@@ -731,14 +722,13 @@ body.fever #board { animation: fever-pulse 0.7s ease-in-out infinite; }
   position: fixed;
   inset: 0;
   z-index: 9999;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   pointer-events: none;
   font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
-  font-size: clamp(3rem, 14vw, 7rem);
   font-weight: 900;
-  color: #ffd700;
-  text-shadow: 5px 5px 0 #8b0000, -3px -3px 0 #8b0000, 3px -3px 0 #8b0000, -3px 3px 0 #8b0000;
   background: rgba(0,0,0,0.55);
   opacity: 0;
   transition: opacity 0.25s;
@@ -746,6 +736,17 @@ body.fever #board { animation: fever-pulse 0.7s ease-in-out infinite; }
 #level-splash.show {
   display: flex;
   animation: splash-in 1.4s ease forwards;
+}
+.splash-title {
+  font-size: clamp(2rem, 9vw, 4.5rem);
+  color: #ff6b6b;
+  text-shadow: 3px 3px 0 #5a0000, -2px -2px 0 #5a0000, 2px -2px 0 #5a0000, -2px 2px 0 #5a0000;
+  letter-spacing: 0.05em;
+}
+.splash-level {
+  font-size: clamp(3rem, 14vw, 7rem);
+  color: #ffd700;
+  text-shadow: 5px 5px 0 #8b0000, -3px -3px 0 #8b0000, 3px -3px 0 #8b0000, -3px 3px 0 #8b0000;
 }
 @keyframes splash-in {
   0%   { opacity: 0; transform: scale(0.4); }

@@ -38,9 +38,11 @@ let miniRun = null, miniRunStep = 0, miniRunTimer = null, miniRunSeconds = 0, mi
 function computeCellSize() {
   const boardPad = 24;
   const gap = 4;
-  const bodyPad  =  window.innerWidth <= 520 ? 16 : 32;
-  const available = window.innerWidth - bodyPad - boardPad - gap * (cols - 1);
-  return Math.max(18, Math.min(40, Math.floor(available / cols)));
+  const w = Math.min(window.innerWidth, 520);
+  const bodyPad = w <= 375 ? 16 : 20;
+  const available = w - bodyPad - boardPad - gap * (cols - 1);
+  const maxCell = w <= 375 ? 34 : 40;
+  return Math.max(16, Math.min(maxCell, Math.floor(available / cols)));
 }
 
 function toggleFlagMode() {
@@ -48,6 +50,10 @@ function toggleFlagMode() {
   const btn = document.getElementById('flag-mode-btn');
   btn.classList.toggle('active', flagMode);
   btn.title = flagMode ? 'Flag mode ON — tap to flag' : 'Flag mode OFF — tap to reveal';
+}
+
+function toggleControls() {
+  document.getElementById('controls-panel').classList.toggle('open');
 }
 
 function startMiniRunTimer() {
@@ -60,7 +66,7 @@ function startMiniRunTimer() {
     if (miniRunSeconds <= 0) {
       clearInterval(miniRunTimer);
       miniRunStep = 0;
-      generateMiniRun();
+      breakCombo();
     }
   }, 1000);
 }
@@ -119,7 +125,7 @@ function completeMiniRun() {
   spawnScoreParticle(bonus, '#ffd700');
   tkFlash('#ffd700');
   playSound('win');
-  setTimeout(() => generateMiniRun(), 2200);
+  setTimeout(() => generateMiniRun(), 0);
 }
 
 function updateMiniRunUI() {
@@ -184,6 +190,10 @@ function animateScoreCounter(target) {
   const el = document.getElementById('total-score');
   if (!el) return;
   if (_scoreRAF) cancelAnimationFrame(_scoreRAF);
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+  setTimeout(() => el.classList.remove('pop'), 400);
   const from = _scoreDisplay;
   const startTime = performance.now();
   const duration = Math.min(600, 80 + Math.abs(target - from) * 0.4);
@@ -210,10 +220,6 @@ function animateScoreCounter(target) {
       _scoreRAF = requestAnimationFrame(tick);
     } else {
       _scoreRAF = null;
-      el.classList.remove('pop');
-      void el.offsetWidth;
-      el.classList.add('pop');
-      setTimeout(() => el.classList.remove('pop'), 220);
     }
   }
   _scoreRAF = requestAnimationFrame(tick);
@@ -279,6 +285,7 @@ function breakCombo() {
   document.body.classList.remove('fever');
   updateRhythmUI();
   updateMusicIntensity();
+  generateMiniRun();
 }
 
 function triggerBeatDrop() {
@@ -328,6 +335,9 @@ function startGame(level) {
   currentLevel = level || 1;
   document.body.classList.remove('game-over', 'game-lost');
   hideGameOverSplash();
+  document.getElementById('don-chan-overlay').classList.remove('visible');
+  document.getElementById('don-chan').classList.remove('bounce','scared','celebrate','cry');
+  document.getElementById('controls-panel').classList.remove('open');
   const cfg = levelConfig(currentLevel);
   cols = cfg.cols;
   rows = cfg.rows;
@@ -592,12 +602,32 @@ function endGame(won, hitR, hitC) {
   }
 }
 
+function showIntroSplash(onDone) {
+  const el = document.getElementById('level-splash');
+  el.innerHTML = '<div class="splash-title">たいこ地雷</div><div class="splash-level">LEVEL 1</div>';
+  el.classList.add('show');
+  // Drum roll: DON — DON — KA — DO-DON
+  const beats = [
+    { fn: () => sfxTaikoDon(),    t: 150  },
+    { fn: () => sfxTaikoDon(),    t: 500  },
+    { fn: () => sfxTaikoKatsu(),  t: 820  },
+    { fn: () => sfxTaikoDodoon(), t: 1100 },
+  ];
+  beats.forEach(b => setTimeout(() => { resume(); b.fn(); }, b.t));
+  setTimeout(() => {
+    el.classList.remove('show');
+    el.innerHTML = '';
+    onDone();
+  }, 2200);
+}
+
 function showLevelSplash(level, onDone) {
   const el = document.getElementById('level-splash');
-  el.textContent = 'LEVEL ' + level;
+  el.innerHTML = '<div class="splash-level">LEVEL ' + level + '</div>';
   el.classList.add('show');
   setTimeout(() => {
     el.classList.remove('show');
+    el.innerHTML = '';
     onDone();
   }, 1400);
 }
@@ -718,12 +748,19 @@ function tkConfetti(x, y) {
 
 function donAnim(state) {
   const don = document.getElementById('don-chan');
+  const overlay = document.getElementById('don-chan-overlay');
   don.classList.remove('bounce', 'scared', 'celebrate', 'cry');
-  void don.offsetWidth; // restart animation
+  void don.offsetWidth;
   don.classList.add(state);
-  if (state !== 'celebrate' && state !== 'cry') {
-    setTimeout(() => don.classList.remove(state), 1000);
+  overlay.classList.add('visible');
+  const duration = state === 'celebrate' ? 2200 : state === 'cry' ? 0 : 900;
+  if (duration > 0) {
+    setTimeout(() => {
+      don.classList.remove(state);
+      overlay.classList.remove('visible');
+    }, duration);
   }
+  // cry state is hidden via the gameover-splash instead
 }
 
 // ── Stats (localStorage) ─────────────────────────────────────────────────
@@ -797,6 +834,7 @@ function resetStats() {
 }
 
 startGame(1);
+showIntroSplash(() => {});
 renderStats();
 
 // ── Sound Engine (Web Audio API, no external files) ──────────────────────
@@ -805,7 +843,7 @@ let muted = false;
 
 function toggleMute() {
   muted = !muted;
-  document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
+  document.getElementById('mute-btn').textContent = muted ? '🔇 Sound' : '🔊 Sound';
 }
 
 function resume() { if (ac.state === 'suspended') ac.resume(); }
@@ -883,20 +921,22 @@ function sfxTaikoDodoon() {
 }
 function sfxTaikoKatsu() {
   const t = ac.currentTime;
-  // Hard rim crack: tight high-freq noise burst
-  noise(0.07, 3200, 10, 0.9, t, ac.destination);
-  noise(0.05, 1400,  5, 0.5, t, ac.destination);
-  // Woody click tone
-  const o = ac.createOscillator(), g = ac.createGain();
-  o.type = 'square';
-  o.frequency.setValueAtTime(900, t);
-  o.frequency.exponentialRampToValueAtTime(350, t + 0.06);
-  g.gain.setValueAtTime(0.35, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-  o.connect(g); g.connect(ac.destination);
-  o.start(t); o.stop(t + 0.09);
-  // High overtone crack
-  noise(0.025, 6000, 4, 0.4, t, ac.destination);
+  // Rim crack transient — sharp attack noise
+  noise(0.055, 2400, 6, 1.0, t, ac.destination);
+  // Mid-body punch — gives it drum character, distinct from DON's sub
+  const o1 = ac.createOscillator(), g1 = ac.createGain();
+  o1.type = 'sine';
+  o1.frequency.setValueAtTime(380, t);
+  o1.frequency.exponentialRampToValueAtTime(160, t + 0.07);
+  g1.gain.setValueAtTime(0, t);
+  g1.gain.linearRampToValueAtTime(0.9, t + 0.003);
+  g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+  o1.connect(g1); g1.connect(ac.destination);
+  o1.start(t); o1.stop(t + 0.13);
+  // Shell resonance — woody body noise
+  noise(0.18, 700, 2.5, 0.55, t, ac.destination);
+  // Bright rim shimmer — the "ka" character
+  noise(0.03, 4500, 8, 0.5, t, ac.destination);
 }
 function sfxTaikoBoom() {
   const t = ac.currentTime;
@@ -990,5 +1030,5 @@ function toggleMusic() {
   } else {
     bgMusic.play().catch(() => {});
   }
-  document.getElementById('music-btn').textContent = musicMuted ? '🔇' : '🎵';
+  document.getElementById('music-btn').textContent = musicMuted ? '🔇 Music' : '🎵 Music';
 }
