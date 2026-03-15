@@ -91,17 +91,19 @@ function generateMiniRun() {
 }
 
 function advanceMiniRun(actionId) {
-  if (!miniRun || gameOver || miniRunStep >= miniRun.length) return;
+  if (!miniRun || gameOver || miniRunStep >= miniRun.length) return false;
   if (miniRun[miniRunStep].id === actionId) {
     if (miniRunStep === 0) startMiniRunTimer(); // start timer on first hit
     miniRunStep++;
     updateMiniRunUI();
     if (miniRunStep >= miniRun.length) completeMiniRun();
+    return true;
   } else if (miniRunStep > 0) {
     miniRunStep = 0;
     stopMiniRunTimer(); // abort timer on mistake
     updateMiniRunUI();
   }
+  return false;
 }
 
 function completeMiniRun() {
@@ -487,8 +489,7 @@ function handleClick(r, c) {
     tkPopup(pos.x, pos.y, 'ドン！', '#e53935');
   }
   donAnim('bounce');
-  addCombo(revealed > 1 ? revealed * 10 : 10, pos.x, pos.y);
-  advanceMiniRun('don');
+  if (advanceMiniRun('don')) addCombo(revealed > 1 ? revealed * 10 : 10, pos.x, pos.y);
 
   checkWin();
   renderBoard();
@@ -514,7 +515,7 @@ function handleFlag(r, c) {
   tkRipple(pos.x, pos.y, '#0984e3', 34);
   tkPopup(pos.x, pos.y, grid[r][c].flagged ? 'カツ！' : 'カツ…', '#0984e3');
   donAnim('bounce');
-  if (grid[r][c].flagged) { addCombo(5, pos.x, pos.y); advanceMiniRun('katsu'); }
+  if (grid[r][c].flagged && advanceMiniRun('katsu')) addCombo(5, pos.x, pos.y);
 
   renderBoard();
   checkWin();
