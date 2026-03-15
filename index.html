@@ -198,12 +198,32 @@
 <body>
   <h1 id="title">たいこ地雷</h1>
 
-  <!-- Header row: [↺ Easy][↺ Med][↺ Hard]  [don-chan]  [🚩][🔊][🎵] -->
+  <!-- Level splash overlay -->
+  <div id="level-splash"></div>
+
+  <!-- Game-over splash overlay -->
+  <div id="gameover-splash">
+    <svg class="don-chan cry" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="33" r="24" fill="#e53935" stroke="#b71c1c" stroke-width="1.5"/>
+      <rect x="6" y="20" width="48" height="7" rx="3.5" fill="#b71c1c"/>
+      <path class="dc-brow" d="M 14 24 Q 20 26 26 28" stroke="#b71c1c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path class="dc-brow" d="M 34 28 Q 40 26 46 24" stroke="#b71c1c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="31" r="5" fill="white" style="transform-box:fill-box;transform-origin:center;transform:scaleY(0.18)"/>
+      <circle cx="40" cy="31" r="5" fill="white" style="transform-box:fill-box;transform-origin:center;transform:scaleY(0.18)"/>
+      <ellipse cx="18" cy="37" rx="2" ry="2.8" fill="#74b9ff"/>
+      <ellipse cx="38" cy="37" rx="2" ry="2.8" fill="#74b9ff"/>
+      <circle cx="11" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
+      <circle cx="49" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
+      <path d="M 20 44 Q 30 37 40 44" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div id="gameover-text">ゲームオーバー</div>
+    <button id="gameover-restart" onclick="startGame(1)">RESTART</button>
+  </div>
+
+  <!-- Header row: [↺ Restart]  [don-chan]  [🚩][🔊][🎵] -->
   <div id="header-row">
     <div id="diff-left">
-      <button id="btn-easy"   class="restart-btn" onclick="startGame('easy')">↺ Easy</button>
-      <button id="btn-medium" class="restart-btn" onclick="startGame('medium')">↺ Med</button>
-      <button id="btn-hard"   class="restart-btn" onclick="startGame('hard')">↺ Hard</button>
+      <button class="restart-btn" onclick="startGame(1)">↺ Restart</button>
     </div>
     <div class="don-chan-wrap">
       <svg id="don-chan" class="don-chan" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
@@ -218,6 +238,8 @@
         <path class="dc-brow dc-brow-scared dc-brow-r" d="M 34 26 Q 40 27 46 23"/>
         <path class="dc-brow dc-brow-happy  dc-brow-l" d="M 14 24 Q 20 20 26 22"/>
         <path class="dc-brow dc-brow-happy  dc-brow-r" d="M 34 22 Q 40 20 46 24"/>
+        <path class="dc-brow dc-brow-cry    dc-brow-l" d="M 14 24 Q 20 26 26 28"/>
+        <path class="dc-brow dc-brow-cry    dc-brow-r" d="M 34 28 Q 40 26 46 24"/>
         <!-- Eye whites -->
         <circle class="dc-eye dc-eye-l" cx="20" cy="31" r="5"   fill="white"/>
         <circle class="dc-eye dc-eye-r" cx="40" cy="31" r="5"   fill="white"/>
@@ -227,6 +249,9 @@
         <!-- Eye shine -->
         <circle class="dc-shine" cx="22.5" cy="30.5" r="1" fill="white"/>
         <circle class="dc-shine" cx="42.5" cy="30.5" r="1" fill="white"/>
+        <!-- Tears -->
+        <ellipse class="dc-tear dc-tear-l" cx="18" cy="37" rx="2" ry="2.8" fill="#74b9ff"/>
+        <ellipse class="dc-tear dc-tear-r" cx="38" cy="37" rx="2" ry="2.8" fill="#74b9ff"/>
         <!-- Cheeks -->
         <circle cx="11" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
         <circle cx="49" cy="37" r="5" fill="#ef9a9a" opacity="0.65"/>
@@ -235,6 +260,7 @@
         <path class="dc-mouth dc-mouth-bounce"    d="M 16 38 Q 30 51 44 38"   stroke="white" stroke-width="3"   fill="none" stroke-linecap="round"/>
         <path class="dc-mouth dc-mouth-celebrate" d="M 14 37 Q 30 53 46 37"   stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>
         <ellipse class="dc-mouth dc-mouth-scared" cx="30" cy="41" rx="5" ry="4" fill="#212121" stroke="white" stroke-width="1"/>
+        <path class="dc-mouth dc-mouth-cry"       d="M 20 44 Q 30 37 40 44"   stroke="white" stroke-width="3"   fill="none" stroke-linecap="round"/>
       </svg>
     </div>
     <div id="util-btns">
@@ -259,7 +285,7 @@
     <div id="energy-bar-wrap"><div id="energy-bar"></div></div>
     <span id="combo-score">+0</span>
   </div>
-  <button id="restart-btn" onclick="startGame(currentDifficulty)">RESTART</button>
+
   <div id="mini-run-bar">
     <span id="mini-run-label">🥁 ×2</span>
     <div id="mini-run-steps"></div>

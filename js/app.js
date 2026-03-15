@@ -1,8 +1,8 @@
-const DIFFICULTIES = {
-  easy:   { cols: 9,  rows: 9,  mines: 10 },
-  medium: { cols: 16, rows: 16, mines: 40 },
-  hard:   { cols: 30, rows: 16, mines: 99 },
-};
+function levelConfig(level) {
+  const size = 6 + level;                          // level 1 → 7×7, level 2 → 8×8, …
+  const mines = Math.max(1, Math.round(size * size * 0.15));
+  return { cols: size, rows: size, mines };
+}
 
 const COLORS = ['', 'n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8'];
 
@@ -15,7 +15,7 @@ const TAIKO_THEME = {
 
 let grid, cols, rows, totalMines, flagCount, revealedCount, gameOver, firstClick;
 let timerInterval, seconds;
-let currentDifficulty = 'easy';
+let currentLevel = 1;
 let flagMode = false;
 
 // ── Rhythm / Combo / Score ────────────────────────────────────────────────
@@ -322,10 +322,11 @@ function tkScorePopup(x, y, text, color) {
   ], { duration:750, easing:'ease-out' }).onfinish = () => el.remove();
 }
 
-function startGame(difficulty) {
-  currentDifficulty = difficulty;
-  document.body.classList.remove('game-over');
-  const cfg = DIFFICULTIES[difficulty];
+function startGame(level) {
+  currentLevel = level || 1;
+  document.body.classList.remove('game-over', 'game-lost');
+  hideGameOverSplash();
+  const cfg = levelConfig(currentLevel);
   cols = cfg.cols;
   rows = cfg.rows;
   totalMines = cfg.mines;
@@ -527,6 +528,7 @@ function endGame(won, hitR, hitC) {
   gameOver = true;
   clearInterval(timerInterval);
   document.body.classList.add('game-over');
+  if (!won) document.body.classList.add('game-lost');
 
   for (let r = 0; r < rows; r++)
     for (let c = 0; c < cols; c++) {
@@ -543,6 +545,8 @@ function endGame(won, hitR, hitC) {
 
   playSound(won ? 'win' : 'boom');
   document.getElementById('message').textContent = won ? TAIKO_THEME.winMsg(seconds) : TAIKO_THEME.loseMsg();
+
+  if (!won) setTimeout(showGameOverSplash, 500);
 
   // freeze mini-run display on game end
   miniRun = null;
@@ -579,7 +583,31 @@ function endGame(won, hitR, hitC) {
         }, i * 180);
       }
     }, 200);
+    // Auto-advance to next level after celebration
+    setTimeout(() => {
+      const nextLevel = currentLevel + 1;
+      showLevelSplash(nextLevel, () => startGame(nextLevel));
+    }, 2200);
   }
+}
+
+function showLevelSplash(level, onDone) {
+  const el = document.getElementById('level-splash');
+  el.textContent = 'LEVEL ' + level;
+  el.classList.add('show');
+  setTimeout(() => {
+    el.classList.remove('show');
+    onDone();
+  }, 1400);
+}
+
+function showGameOverSplash() {
+  donAnim('cry');
+  document.getElementById('gameover-splash').classList.add('show');
+}
+
+function hideGameOverSplash() {
+  document.getElementById('gameover-splash').classList.remove('show');
 }
 
 // ── Taiko Animations ─────────────────────────────────────────────────────
@@ -689,10 +717,10 @@ function tkConfetti(x, y) {
 
 function donAnim(state) {
   const don = document.getElementById('don-chan');
-  don.classList.remove('bounce', 'scared', 'celebrate');
+  don.classList.remove('bounce', 'scared', 'celebrate', 'cry');
   void don.offsetWidth; // restart animation
   don.classList.add(state);
-  if (state !== 'celebrate') {
+  if (state !== 'celebrate' && state !== 'cry') {
     setTimeout(() => don.classList.remove(state), 1000);
   }
 }
@@ -717,7 +745,9 @@ function saveStats(stats) {
 
 function recordGame(won, timeSecs) {
   const stats = loadStats();
-  const d = stats[currentDifficulty];
+  const key = 'level_' + currentLevel;
+  if (!stats[key]) stats[key] = defaultStats();
+  const d = stats[key];
   d.played++;
   if (won) {
     d.won++;
@@ -735,8 +765,11 @@ function recordGame(won, timeSecs) {
 function renderStats() {
   const stats = loadStats();
   const tbody = document.getElementById('stats-body');
-  const labels = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
-  tbody.innerHTML = Object.entries(labels).map(([key, label]) => {
+  const keys = Object.keys(stats).filter(k => k.startsWith('level_'))
+    .sort((a, b) => parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]));
+  if (!keys.length) { tbody.innerHTML = '<tr><td colspan="7">No games yet</td></tr>'; return; }
+  tbody.innerHTML = keys.map(key => {
+    const level = key.split('_')[1];
     const d = stats[key];
     const pct = d.played ? Math.round(d.won / d.played * 100) : 0;
     const best = d.bestTime !== null ? d.bestTime + 's' : '—';
@@ -745,7 +778,7 @@ function renderStats() {
       : '0';
     const topScore = d.bestScore ? d.bestScore.toLocaleString() : '—';
     return `<tr>
-      <td>${label}</td>
+      <td>Level ${level}</td>
       <td>${d.played}</td>
       <td>${d.won}</td>
       <td>${pct}%</td>
@@ -762,7 +795,7 @@ function resetStats() {
   renderStats();
 }
 
-startGame('easy');
+startGame(1);
 renderStats();
 
 // ── Sound Engine (Web Audio API, no external files) ──────────────────────
