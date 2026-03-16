@@ -703,7 +703,7 @@ function handleClick(r, c) {
   }
 
   const before = revealedCount;
-  reveal(r, c, true);
+  const revealOrder = revealBFS(r, c);
   const revealed = revealedCount - before;
   playSound(revealed > 1 ? 'flood' : 'click');
 
@@ -720,7 +720,7 @@ function handleClick(r, c) {
   collectRevealedBonus(r, c, pos);
 
   checkWin();
-  renderBoard();
+  animateCellReveal(revealOrder);
 }
 
 function reveal(r, c, isDirectClick = false) {
@@ -730,6 +730,48 @@ function reveal(r, c, isDirectClick = false) {
   revealedCount++;
   if (grid[r][c].adjacent === 0)
     neighbors(r, c).forEach(([nr, nc]) => reveal(nr, nc));
+}
+
+// BFS reveal that returns cells in wave order [{r,c,dist}] for animation
+function revealBFS(r, c) {
+  const order = [];
+  const queue = [[r, c, 0, true]];
+  const seen = new Set();
+  const key = (row, col) => row * 10000 + col;
+  while (queue.length) {
+    const [cr, cc, dist, direct] = queue.shift();
+    const k = key(cr, cc);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    if (grid[cr][cc].revealed || grid[cr][cc].flagged || grid[cr][cc].mine) continue;
+    if (grid[cr][cc].bonus && !direct) continue;
+    grid[cr][cc].revealed = true;
+    revealedCount++;
+    order.push({ r: cr, c: cc, dist });
+    if (grid[cr][cc].adjacent === 0)
+      neighbors(cr, cc).forEach(([nr, nc]) => { if (!seen.has(key(nr, nc))) queue.push([nr, nc, dist + 1, false]); });
+  }
+  return order;
+}
+
+function animateCellReveal(revealOrder) {
+  const board = document.getElementById('board');
+  const STEP = 38; // ms per distance wave
+  for (const { r, c, dist } of revealOrder) {
+    setTimeout(() => {
+      if (gameOver) return;
+      const cellEl = board.children[r * cols + c];
+      if (!cellEl) return;
+      const d = grid[r][c];
+      cellEl.classList.remove('hidden', 'flagged');
+      cellEl.classList.add('revealed', 'reveal-pop');
+      if (d.adjacent > 0) {
+        cellEl.textContent = d.adjacent;
+        cellEl.classList.add(COLORS[d.adjacent]);
+      }
+      cellEl.addEventListener('animationend', () => cellEl.classList.remove('reveal-pop'), { once: true });
+    }, dist * STEP);
+  }
 }
 
 function handleFlag(r, c) {
