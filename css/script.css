@@ -712,6 +712,9 @@ h1 { display: none; }
   opacity: 1;
   animation: mr-pulse 0.5s ease-in-out infinite alternate;
 }
+#mini-run-bar.critical .mr-step.active {
+  animation-duration: 0.18s;
+}
 .mr-step.pending { opacity: 0.25; }
 .mr-arrow {
   color: rgba(255,215,0,0.4);
@@ -735,7 +738,6 @@ h1 { display: none; }
 }
 #mini-run-timer.urgent {
   color: #ff2d55;
-  animation: mr-pulse 0.4s ease-in-out infinite alternate;
 }
 .visually-hidden-content {
   position: absolute;

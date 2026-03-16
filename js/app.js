@@ -17,6 +17,10 @@ let grid, cols, rows, totalMines, flagCount, revealedCount, gameOver, firstClick
 let timerInterval, seconds;
 let currentLevel = 1;
 let flagMode = false;
+const MOUSE_LONG_PRESS_MS = 360;
+const MOUSE_LONG_PRESS_SUPPRESS_MS = 250;
+let mouseLongPressTimer = null;
+let mouseLongPressSuppress = null;
 
 // ── Rhythm / Combo / Score ────────────────────────────────────────────────
 const RHYTHM_LEVELS = [
@@ -35,6 +39,7 @@ const MINI_RUN_POOL = [
   { id: 'katsu', label: 'KATSU', color: '#0984e3' },
 ];
 let miniRun = null, miniRunStep = 0, miniRunTimer = null, miniRunSeconds = 0, miniRunCount = 0, defusedCount = 0;
+let miniRunBonusEligible = true;
 
 function computeCellSize() {
   const boardPad = 24;
@@ -44,6 +49,40 @@ function computeCellSize() {
   const available = w - bodyPad - boardPad - gap * (cols - 1);
   const maxCell = w <= 375 ? 34 : 40;
   return Math.max(16, Math.min(maxCell, Math.floor(available / cols)));
+}
+
+function clearMouseLongPress() {
+  if (!mouseLongPressTimer) return;
+  clearTimeout(mouseLongPressTimer);
+  mouseLongPressTimer = null;
+}
+
+function suppressMouseLongPressClick(r, c) {
+  mouseLongPressSuppress = { r, c };
+  setTimeout(() => {
+    if (mouseLongPressSuppress && mouseLongPressSuppress.r === r && mouseLongPressSuppress.c === c)
+      mouseLongPressSuppress = null;
+  }, MOUSE_LONG_PRESS_SUPPRESS_MS);
+}
+
+function shouldIgnoreMouseClick(r, c) {
+  if (!mouseLongPressSuppress) return false;
+  if (mouseLongPressSuppress.r !== r || mouseLongPressSuppress.c !== c) return false;
+  mouseLongPressSuppress = null;
+  return true;
+}
+
+function startMouseLongPress(event, r, c) {
+  if (event.pointerType !== 'mouse' || event.button !== 0 || flagMode) return;
+  if (gameOver || grid[r][c].revealed) return;
+
+  clearMouseLongPress();
+  mouseLongPressTimer = setTimeout(() => {
+    mouseLongPressTimer = null;
+    if (gameOver || grid[r][c].revealed) return;
+    suppressMouseLongPressClick(r, c);
+    handleFlag(r, c);
+  }, MOUSE_LONG_PRESS_MS);
 }
 
 function toggleFlagMode() {
@@ -76,30 +115,59 @@ function stopMiniRunTimer() {
   clearInterval(miniRunTimer);
   miniRunTimer = null;
   const el = document.getElementById('mini-run-timer');
-  if (el) el.textContent = '';
+  const bar = document.getElementById('mini-run-bar');
+  if (el) {
+    el.textContent = '';
+    el.classList.remove('urgent');
+  }
+  if (bar) bar.classList.remove('critical');
 }
 
 function updateMiniRunTimer() {
   const el = document.getElementById('mini-run-timer');
-  if (!el) return;
-  el.textContent = miniRunSeconds + 's';
-  el.classList.toggle('urgent', miniRunSeconds <= 5);
+  const bar = document.getElementById('mini-run-bar');
+  if (el) {
+    el.textContent = miniRunSeconds + 's';
+    el.classList.toggle('urgent', miniRunSeconds <= 5);
+  }
+  if (bar) bar.classList.toggle('critical', miniRunSeconds < 5);
+}
+
+function shuffleMiniRun(steps) {
+  for (let i = steps.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [steps[i], steps[j]] = [steps[j], steps[i]];
+  }
+  return steps;
+}
+
+function buildMiniRun(len) {
+  const donStep = MINI_RUN_POOL.find(step => step.id === 'don');
+  const katsuStep = MINI_RUN_POOL.find(step => step.id === 'katsu');
+  const katsuCount = Math.floor(len / 2);
+  const donCount = len - katsuCount;
+
+  return shuffleMiniRun([
+    ...Array.from({ length: donCount }, () => donStep),
+    ...Array.from({ length: katsuCount }, () => katsuStep),
+  ]);
 }
 
 function generateMiniRun() {
+  stopMiniRunTimer();
   const len = Math.min(2 + miniRunCount, 5);
-  miniRun = Array.from({ length: len }, () =>
-    MINI_RUN_POOL[Math.floor(Math.random() * MINI_RUN_POOL.length)]
-  );
+  miniRun = buildMiniRun(len);
   miniRunStep = 0;
+  miniRunBonusEligible = true;
   document.getElementById('mini-run-bar').classList.remove('complete');
   document.getElementById('mini-run-label').textContent = '🥁 ×' + len;
   updateMiniRunUI();
 }
 
-function advanceMiniRun(actionId) {
+function advanceMiniRun(actionId, isValidHit = true) {
   if (!miniRun || gameOver || miniRunStep >= miniRun.length) return false;
   if (miniRun[miniRunStep].id === actionId) {
+    if (actionId === 'katsu' && !isValidHit) miniRunBonusEligible = false;
     if (miniRunStep === 0) startMiniRunTimer(); // start timer on first hit
     miniRunStep++;
     updateMiniRunUI();
@@ -116,15 +184,17 @@ function advanceMiniRun(actionId) {
 function completeMiniRun() {
   miniRunCount++;
   stopMiniRunTimer();
-  const bonus = miniRun.length * 50 * RHYTHM_LEVELS[rhythmLevel].mult;
-  score += bonus;
-  updateRhythmUI();
+  const bonus = miniRunBonusEligible ? miniRun.length * 50 * RHYTHM_LEVELS[rhythmLevel].mult : 0;
   const bar = document.getElementById('mini-run-bar');
   bar.classList.add('complete');
-  document.getElementById('mini-run-label').textContent = '✨ Perfect run!';
-  tkScorePopup(window.innerWidth / 2, window.innerHeight * 0.35, '+' + bonus + ' PERFECT!', '#ffd700');
-  spawnScoreParticle(bonus, '#ffd700');
-  tkFlash('#ffd700');
+  document.getElementById('mini-run-label').textContent = bonus > 0 ? '✨ Perfect run!' : '✔ Run clear';
+  if (bonus > 0) {
+    score += bonus;
+    tkScorePopup(window.innerWidth / 2, window.innerHeight * 0.35, '+' + bonus + ' PERFECT!', '#ffd700');
+    spawnScoreParticle(bonus, '#ffd700');
+    tkFlash('#ffd700');
+  }
+  updateRhythmUI();
   donAnim('hype');
   playSound('win');
   setTimeout(() => generateMiniRun(), 0);
@@ -336,6 +406,8 @@ function tkScorePopup(x, y, text, color) {
 
 function startGame(level) {
   currentLevel = level || 1;
+  clearMouseLongPress();
+  mouseLongPressSuppress = null;
   document.body.classList.remove('game-over', 'game-lost');
   hideGameOverSplash();
   if (donAnimTimeout) {
@@ -448,7 +520,14 @@ function renderBoard() {
         cell.classList.add('hidden');
       }
 
-      cell.addEventListener('click', () => handleClick(r, c));
+      cell.addEventListener('click', () => {
+        if (shouldIgnoreMouseClick(r, c)) return;
+        handleClick(r, c);
+      });
+      cell.addEventListener('pointerdown', e => startMouseLongPress(e, r, c));
+      cell.addEventListener('pointerup', clearMouseLongPress);
+      cell.addEventListener('pointerleave', clearMouseLongPress);
+      cell.addEventListener('pointercancel', clearMouseLongPress);
       cell.addEventListener('contextmenu', e => { e.preventDefault(); handleFlag(r, c); });
       board.appendChild(cell);
     }
@@ -532,7 +611,8 @@ function handleFlag(r, c) {
   tkRipple(pos.x, pos.y, '#0984e3', 34);
   tkPopup(pos.x, pos.y, grid[r][c].flagged ? 'カツ！' : 'カツ…', '#0984e3');
   donAnim('katsu');
-  if (grid[r][c].flagged && advanceMiniRun('katsu')) addCombo(5, pos.x, pos.y);
+  if (grid[r][c].flagged && advanceMiniRun('katsu', grid[r][c].mine))
+    addCombo(5, pos.x, pos.y);
 
   renderBoard();
   checkWin();
@@ -544,6 +624,8 @@ function checkWin() {
 
 function endGame(won, hitR, hitC) {
   gameOver = true;
+  clearMouseLongPress();
+  mouseLongPressSuppress = null;
   clearInterval(timerInterval);
   document.body.classList.add('game-over');
   if (!won) document.body.classList.add('game-lost');
