@@ -1,6 +1,6 @@
 function levelConfig(level) {
-  const size = 6 + level;                          // level 1 → 7×7, level 2 → 8×8, …
-  const mines = Math.max(1, Math.round(size * size * 0.15));
+  const size = 7 + level;                          // level 1 → 8×8, level 2 → 9×9, …
+  const mines = Math.max(1, Math.round(size * size * 0.12));
   return { cols: size, rows: size, mines };
 }
 
@@ -1007,11 +1007,48 @@ window.addEventListener('resize', () => {
 });
 
 // ── Background Music ──────────────────────────────────────────────────────
-const bgMusic = new Audio(`music/music${Math.floor(Math.random() * 6) + 1}.mp3`);
-bgMusic.loop = true;
+const MUSIC_TRACKS = [
+  'music/music1.mp3',
+  'music/music2.mp3',
+  'music/music3.mp3',
+  'music/music4.mp3',
+  'music/music5.mp3',
+  'music/music6.mp3',
+];
+
+const bgMusic = new Audio();
+bgMusic.loop = false;
 bgMusic.volume = 0.2; // kept low so game sounds stay louder
 
+let currentTrackIndex = -1;
+
 let musicMuted = false;
+
+function pickNextTrackIndex() {
+  if (MUSIC_TRACKS.length <= 1) return 0;
+
+  let nextIndex = currentTrackIndex;
+  while (nextIndex === currentTrackIndex) {
+    nextIndex = Math.floor(Math.random() * MUSIC_TRACKS.length);
+  }
+  return nextIndex;
+}
+
+function setBackgroundTrack(index) {
+  currentTrackIndex = index;
+  bgMusic.src = MUSIC_TRACKS[index];
+}
+
+function playNextTrack() {
+  setBackgroundTrack(pickNextTrackIndex());
+  if (!musicMuted) bgMusic.play().catch(() => {});
+}
+
+bgMusic.addEventListener('ended', () => {
+  playNextTrack();
+});
+
+setBackgroundTrack(pickNextTrackIndex());
 
 function tryPlayMusic() {
   if (!musicMuted) bgMusic.play().catch(() => {});

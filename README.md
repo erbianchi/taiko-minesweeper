@@ -18,7 +18,7 @@ Then open `http://localhost:8000`.
 index.html       — game markup
 css/script.css   — all styles
 js/app.js        — all game logic, audio engine
-music/           — looping background music tracks (music1–4.mp3)
+music/           — background music tracks (music1–6.mp3)
 game.py          — placeholder (unused)
 ```
 
@@ -109,7 +109,7 @@ All sounds are synthesized with the **Web Audio API** (no external sound files r
 | Clear fanfare | Completing a level |
 | Boom | Hitting a mine |
 
-Background music loops randomly from `music/music1–4.mp3`. Sound effects and music have independent mute controls in the ⋮ menu.
+Background music is chosen randomly from `music/music1–6.mp3`, and when one track ends the game picks another automatically. Sound effects and music have independent mute controls in the ⋮ menu.
 
 ## Responsive Design
 
