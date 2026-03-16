@@ -79,6 +79,8 @@ h1 { display: none; }
   user-select: none;
 }
 .don-chan.bounce   { animation: dc-bounce   0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+.don-chan.katsu    { animation: dc-katsu    0.6s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.don-chan.hype     { animation: dc-hype     0.8s cubic-bezier(0.22, 0.61, 0.36, 1); }
 .don-chan.scared   { animation: dc-scared   0.55s ease-out; }
 .don-chan.celebrate{ animation: dc-celebrate 0.7s ease-in-out infinite; }
 
@@ -139,6 +141,27 @@ h1 { display: none; }
 .don-chan.bounce .dc-mouth-bounce   { display: block; }
 .don-chan.bounce .dc-brow-normal    { display: none; }
 .don-chan.bounce .dc-brow-happy     { display: block; }
+
+/* ── katsu: wink + smirk for flag actions ── */
+.don-chan.katsu .dc-eye-l   { transform: scaleY(1.08) scaleX(1.03); animation: none; }
+.don-chan.katsu .dc-eye-r   { transform: scaleY(0.16) translateY(1.4px); animation: none; }
+.don-chan.katsu .dc-pupil-l { transform: translate(-0.5px, -0.4px); animation: none; }
+.don-chan.katsu .dc-pupil-r { opacity: 0; animation: none; }
+.don-chan.katsu .dc-shine-l { transform: translate(-0.4px, -0.4px); }
+.don-chan.katsu .dc-shine-r { opacity: 0; }
+.don-chan.katsu .dc-mouth-default  { display: none; }
+.don-chan.katsu .dc-mouth-bounce   { display: block; }
+.don-chan.katsu .dc-brow-normal    { display: none; }
+.don-chan.katsu .dc-brow-happy     { display: block; }
+
+/* ── hype: wide-eyed excited grin for bonus moments ── */
+.don-chan.hype .dc-eye    { transform: scaleY(1.18) scaleX(1.05); animation: none; }
+.don-chan.hype .dc-pupil  { transform: translateY(-1.3px); animation: none; }
+.don-chan.hype .dc-shine  { transform: translateY(-1.3px); }
+.don-chan.hype .dc-mouth-default   { display: none; }
+.don-chan.hype .dc-mouth-celebrate { display: block; }
+.don-chan.hype .dc-brow-normal     { display: none; }
+.don-chan.hype .dc-brow-happy      { display: block; }
 
 /* ── scared: wide eyes, open mouth ── */
 .don-chan.scared .dc-eye    { transform: scaleY(1.25) scaleX(1.05); animation: none; }
@@ -471,6 +494,20 @@ h1 { display: none; }
   50%  { transform: scale(0.9, 1.2) translateY(-18px);}
   75%  { transform: scale(1.1, 0.9) translateY(4px);  }
   100% { transform: scale(1,   1  ) translateY(0);    }
+}
+@keyframes dc-katsu {
+  0%   { transform: scale(1) translateY(0) rotate(0deg); }
+  20%  { transform: scale(1.1, 0.92) translateY(4px) rotate(-8deg); }
+  45%  { transform: scale(0.96, 1.08) translateY(-11px) rotate(10deg); }
+  70%  { transform: scale(1.04, 0.98) translateY(2px) rotate(-4deg); }
+  100% { transform: scale(1) translateY(0) rotate(0deg); }
+}
+@keyframes dc-hype {
+  0%   { transform: scale(1) translateY(0) rotate(0deg); }
+  25%  { transform: scale(1.12, 0.92) translateY(6px) rotate(-4deg); }
+  50%  { transform: scale(0.98, 1.12) translateY(-14px) rotate(4deg); }
+  75%  { transform: scale(1.08, 0.95) translateY(2px) rotate(-2deg); }
+  100% { transform: scale(1) translateY(0) rotate(0deg); }
 }
 @keyframes dc-scared {
   0%,100%{ transform: scale(1)    rotate(0deg);   }

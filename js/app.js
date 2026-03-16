@@ -28,6 +28,7 @@ const RHYTHM_LEVELS = [
 ];
 let combo = 0, score = 0, comboScore = 0, rhythmLevel = 0;
 let _scoreDisplay = 0, _scoreRAF = null, lastMilestone = 0;
+let donAnimTimeout = null;
 
 const MINI_RUN_POOL = [
   { id: 'don',   label: 'DON',   color: '#e53935' },
@@ -124,6 +125,7 @@ function completeMiniRun() {
   tkScorePopup(window.innerWidth / 2, window.innerHeight * 0.35, '+' + bonus + ' PERFECT!', '#ffd700');
   spawnScoreParticle(bonus, '#ffd700');
   tkFlash('#ffd700');
+  donAnim('hype');
   playSound('win');
   setTimeout(() => generateMiniRun(), 0);
 }
@@ -181,7 +183,7 @@ function revealFreeMine() {
   tkRipple(x, y, '#ffd700', 46);
   tkPopup(x, y, 'SAFE! 💣', '#ffd700');
   tkFlash('#ffd700');
-  donAnim('bounce');
+  donAnim('hype');
   playSound('flood');
   checkWin();
 }
@@ -292,6 +294,7 @@ function triggerBeatDrop() {
   document.body.classList.add('fever');
   playSound('beatdrop');
   tkFlash('#ff4500');
+  donAnim('hype');
   setTimeout(() => tkBanner(RHYTHM_LEVELS[rhythmLevel].label), 60);
 }
 
@@ -335,8 +338,12 @@ function startGame(level) {
   currentLevel = level || 1;
   document.body.classList.remove('game-over', 'game-lost');
   hideGameOverSplash();
+  if (donAnimTimeout) {
+    clearTimeout(donAnimTimeout);
+    donAnimTimeout = null;
+  }
   document.getElementById('don-chan-overlay').classList.remove('visible');
-  document.getElementById('don-chan').classList.remove('bounce','scared','celebrate','cry');
+  document.getElementById('don-chan').classList.remove('bounce', 'katsu', 'hype', 'scared', 'celebrate', 'cry');
   document.getElementById('controls-panel').classList.remove('open');
   const cfg = levelConfig(currentLevel);
   cols = cfg.cols;
@@ -371,7 +378,7 @@ function startGame(level) {
 
   // stop don-chan celebrate loop
   const don = document.getElementById('don-chan');
-  don.classList.remove('bounce', 'scared', 'celebrate');
+  don.classList.remove('bounce', 'katsu', 'hype', 'scared', 'celebrate', 'cry');
 
   grid = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
@@ -524,7 +531,7 @@ function handleFlag(r, c) {
   // Taiko flag animation (katsu = blue rim hit)
   tkRipple(pos.x, pos.y, '#0984e3', 34);
   tkPopup(pos.x, pos.y, grid[r][c].flagged ? 'カツ！' : 'カツ…', '#0984e3');
-  donAnim('bounce');
+  donAnim('katsu');
   if (grid[r][c].flagged && advanceMiniRun('katsu')) addCombo(5, pos.x, pos.y);
 
   renderBoard();
@@ -749,18 +756,26 @@ function tkConfetti(x, y) {
 function donAnim(state) {
   const don = document.getElementById('don-chan');
   const overlay = document.getElementById('don-chan-overlay');
-  don.classList.remove('bounce', 'scared', 'celebrate', 'cry');
+  if (donAnimTimeout) {
+    clearTimeout(donAnimTimeout);
+    donAnimTimeout = null;
+  }
+  don.classList.remove('bounce', 'katsu', 'hype', 'scared', 'celebrate', 'cry');
   void don.offsetWidth;
   don.classList.add(state);
+  if (state === 'cry') {
+    overlay.classList.remove('visible');
+    return;
+  }
   overlay.classList.add('visible');
-  const duration = state === 'celebrate' ? 2200 : state === 'cry' ? 0 : 900;
+  const duration = state === 'celebrate' ? 2200 : state === 'hype' ? 1100 : 900;
   if (duration > 0) {
-    setTimeout(() => {
+    donAnimTimeout = setTimeout(() => {
       don.classList.remove(state);
       overlay.classList.remove('visible');
+      donAnimTimeout = null;
     }, duration);
   }
-  // cry state is hidden via the gameover-splash instead
 }
 
 // ── Stats (localStorage) ─────────────────────────────────────────────────
