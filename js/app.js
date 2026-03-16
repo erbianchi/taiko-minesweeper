@@ -12,6 +12,14 @@ const TAIKO_THEME = {
   winMsg:  s => `クリア！ ${s}秒でクリア！🎉`,
   loseMsg: () => 'ドカーン！ ゲームオーバー！💥',
 };
+const BOARD_BONUS = {
+  id: 'life',
+  label: '1UP',
+  title: 'LIFE',
+  color: '#ffd700',
+  popup: '1UP!',
+  savePopup: '1UP SAVE!',
+};
 
 let grid, cols, rows, totalMines, flagCount, revealedCount, gameOver, firstClick;
 let timerInterval, seconds;
@@ -40,6 +48,7 @@ const MINI_RUN_POOL = [
 ];
 let miniRun = null, miniRunStep = 0, miniRunTimer = null, miniRunSeconds = 0, miniRunCount = 0, defusedCount = 0;
 let miniRunBonusEligible = true;
+let extraLives = 0;
 
 function computeCellSize() {
   const boardPad = 24;
@@ -49,6 +58,119 @@ function computeCellSize() {
   const available = w - bodyPad - boardPad - gap * (cols - 1);
   const maxCell = w <= 375 ? 34 : 40;
   return Math.max(16, Math.min(maxCell, Math.floor(available / cols)));
+}
+
+function createBonusCard() {
+  const card = document.createElement('div');
+  card.className = 'bonus-card life-card';
+
+  const title = document.createElement('span');
+  title.className = 'bonus-card-top';
+  title.textContent = BOARD_BONUS.title;
+
+  const label = document.createElement('span');
+  label.className = 'bonus-card-main';
+  label.textContent = BOARD_BONUS.label;
+
+  card.append(title, label);
+  return card;
+}
+
+function pulseBonusTray() {
+  const tray = document.getElementById('score-bonus-tray');
+  if (!tray) return;
+  tray.classList.remove('pop');
+  void tray.offsetWidth;
+  tray.classList.add('pop');
+  setTimeout(() => tray.classList.remove('pop'), 420);
+}
+
+function renderBonusTray() {
+  const tray = document.getElementById('score-bonus-tray');
+  if (!tray) return;
+  tray.innerHTML = '';
+  for (let i = 0; i < extraLives; i++)
+    tray.appendChild(createBonusCard());
+}
+
+function clearFlyingBonusCards() {
+  document.querySelectorAll('.bonus-fly-card').forEach(el => {
+    el.getAnimations().forEach(animation => animation.cancel());
+    el.remove();
+  });
+}
+
+function flyBonusCardToScore(x, y) {
+  const tray = document.getElementById('score-bonus-tray');
+  if (!tray) {
+    renderBonusTray();
+    return;
+  }
+
+  const card = createBonusCard();
+  card.classList.add('bonus-fly-card');
+  card.style.left = x + 'px';
+  card.style.top = y + 'px';
+  card.style.transform = 'translate(-50%, -50%) rotate(-10deg)';
+  document.body.appendChild(card);
+
+  const trayRect = tray.getBoundingClientRect();
+  const dx = trayRect.left + trayRect.width / 2 - x;
+  const dy = trayRect.top + trayRect.height / 2 - y;
+
+  card.animate([
+    { transform: 'translate(-50%, -50%) scale(0.4) rotate(-18deg)', opacity: 0.35 },
+    { transform: 'translate(-50%, -50%) scale(1.12) rotate(8deg)', opacity: 1, offset: 0.22 },
+    { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.9) rotate(-5deg)`, opacity: 1 },
+  ], { duration: 760, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }).onfinish = () => {
+    card.remove();
+    renderBonusTray();
+    pulseBonusTray();
+  };
+}
+
+function placeBoardBonus() {
+  const safeCells = [];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine)
+        safeCells.push([r, c]);
+
+  if (!safeCells.length) return;
+  const [r, c] = safeCells[Math.floor(Math.random() * safeCells.length)];
+  grid[r][c].bonus = BOARD_BONUS.id;
+}
+
+function collectRevealedBonus(r, c, pos) {
+  const cell = grid[r][c];
+  if (!cell.revealed || cell.bonus !== BOARD_BONUS.id || cell.bonusCollected) return false;
+
+  cell.bonusCollected = true;
+  extraLives++;
+  tkRipple(pos.x, pos.y, BOARD_BONUS.color, 46);
+  tkPopup(pos.x, pos.y, BOARD_BONUS.popup, BOARD_BONUS.color);
+  tkFlash(BOARD_BONUS.color);
+  donAnim('hype');
+  playSound('pickup');
+  flyBonusCardToScore(pos.x, pos.y);
+  return true;
+}
+
+function spendExtraLife(r, c, pos) {
+  extraLives = Math.max(0, extraLives - 1);
+  renderBonusTray();
+  grid[r][c].revealed = true;
+  grid[r][c].defused = true;
+  defusedCount++;
+  document.getElementById('mines-left').textContent = totalMines - flagCount - defusedCount;
+
+  renderBoard();
+  tkRipple(pos.x, pos.y, BOARD_BONUS.color, 48);
+  tkPopup(pos.x, pos.y, BOARD_BONUS.savePopup, BOARD_BONUS.color);
+  tkFlash(BOARD_BONUS.color);
+  donAnim('hype');
+  playSound('save');
+  breakCombo();
 }
 
 function clearMouseLongPress() {
@@ -440,10 +562,13 @@ function startGame(level) {
 
   // reset rhythm / score / mini-run
   combo = 0; score = 0; comboScore = 0; rhythmLevel = 0; lastMilestone = 0; miniRunCount = 0; defusedCount = 0;
+  extraLives = 0;
   _scoreDisplay = 0;
   if (_scoreRAF) { cancelAnimationFrame(_scoreRAF); _scoreRAF = null; }
   const tsEl = document.getElementById('total-score');
   if (tsEl) tsEl.textContent = '0';
+  clearFlyingBonusCards();
+  renderBonusTray();
   document.body.classList.remove('fever');
   updateRhythmUI();
   generateMiniRun();
@@ -455,6 +580,7 @@ function startGame(level) {
   grid = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
       mine: false, revealed: false, flagged: false, adjacent: 0,
+      defused: false, bonus: null, bonusCollected: false,
     }))
   );
 
@@ -475,6 +601,7 @@ function placeMines(safeR, safeC) {
     for (let c = 0; c < cols; c++)
       if (!grid[r][c].mine)
         grid[r][c].adjacent = neighbors(r, c).filter(([nr, nc]) => grid[nr][nc].mine).length;
+  placeBoardBonus();
 }
 
 function neighbors(r, c) {
@@ -559,6 +686,10 @@ function handleClick(r, c) {
   const pos = getCellCenter(r, c);
 
   if (grid[r][c].mine) {
+    if (extraLives > 0) {
+      spendExtraLife(r, c, pos);
+      return;
+    }
     grid[r][c].revealed = true;
     endGame(false, r, c);
     // Taiko mine hit animations
@@ -572,7 +703,7 @@ function handleClick(r, c) {
   }
 
   const before = revealedCount;
-  reveal(r, c);
+  reveal(r, c, true);
   const revealed = revealedCount - before;
   playSound(revealed > 1 ? 'flood' : 'click');
 
@@ -586,13 +717,15 @@ function handleClick(r, c) {
   }
   donAnim('bounce');
   if (advanceMiniRun('don')) addCombo(revealed > 1 ? revealed * 10 : 10, pos.x, pos.y);
+  collectRevealedBonus(r, c, pos);
 
   checkWin();
   renderBoard();
 }
 
-function reveal(r, c) {
+function reveal(r, c, isDirectClick = false) {
   if (grid[r][c].revealed || grid[r][c].flagged || grid[r][c].mine) return;
+  if (grid[r][c].bonus && !isDirectClick) return;
   grid[r][c].revealed = true;
   revealedCount++;
   if (grid[r][c].adjacent === 0)
@@ -626,6 +759,7 @@ function endGame(won, hitR, hitC) {
   gameOver = true;
   clearMouseLongPress();
   mouseLongPressSuppress = null;
+  clearFlyingBonusCards();
   clearInterval(timerInterval);
   document.body.classList.add('game-over');
   if (!won) document.body.classList.add('game-lost');
@@ -1083,6 +1217,47 @@ function sfxBeatDrop() {
   osc('sine', 60, t + 0.44, 0.22, 0.7, ac.destination);
 }
 
+function sfxTaikoSave() {
+  const t = ac.currentTime;
+  const notes = [
+    { freq: 784, at: 0.00, dur: 0.18, gain: 0.22 },
+    { freq: 1047, at: 0.11, dur: 0.28, gain: 0.26 },
+  ];
+
+  noise(0.03, 2200, 5, 0.16, t, ac.destination);
+
+  notes.forEach(note => {
+    osc('triangle', note.freq, t + note.at, note.dur, note.gain, ac.destination);
+    osc('sine', note.freq * 2, t + note.at, note.dur * 0.7, note.gain * 0.18, ac.destination);
+  });
+
+  const sparkle = ac.createOscillator();
+  const sparkleGain = ac.createGain();
+  sparkle.type = 'triangle';
+  sparkle.frequency.setValueAtTime(1568, t + 0.08);
+  sparkle.frequency.exponentialRampToValueAtTime(2093, t + 0.3);
+  sparkleGain.gain.setValueAtTime(0.08, t + 0.08);
+  sparkleGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+  sparkle.connect(sparkleGain);
+  sparkleGain.connect(ac.destination);
+  sparkle.start(t + 0.08);
+  sparkle.stop(t + 0.34);
+}
+
+function sfxBonusPickup() {
+  const t = ac.currentTime;
+  const notes = [
+    { freq: 988,  at: 0.00, dur: 0.14, gain: 0.16 },
+    { freq: 1319, at: 0.08, dur: 0.2,  gain: 0.2  },
+  ];
+
+  noise(0.018, 2600, 6, 0.1, t, ac.destination);
+  notes.forEach(note => {
+    osc('triangle', note.freq, t + note.at, note.dur, note.gain, ac.destination);
+    osc('sine', note.freq * 2, t + note.at, note.dur * 0.55, note.gain * 0.14, ac.destination);
+  });
+}
+
 function playSound(name) {
   if (muted) return;
   resume();
@@ -1094,6 +1269,8 @@ function playSound(name) {
     case 'boom':     sfxTaikoBoom();   break;
     case 'win':      sfxTaikoClear();  break;
     case 'beatdrop': sfxBeatDrop();    break;
+    case 'save':     sfxTaikoSave();   break;
+    case 'pickup':   sfxBonusPickup(); break;
   }
 }
 // Re-compute cell size on resize (e.g. orientation change)
