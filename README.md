@@ -14,7 +14,7 @@ Then open `http://localhost:8000`.
 
 ## Testing
 
-Unit tests cover all core game logic (level config, rhythm levels, mine placement, flood reveal, mini-run sequencing, win condition). They run in Node with no external dependencies:
+Unit tests cover all core game logic (level config, rhythm levels, mine placement, flood reveal, mini-run sequencing, punishment mechanics, win condition). They run in Node with no external dependencies:
 
 ```bash
 node js/app.test.js
@@ -29,6 +29,15 @@ js/app.js        — all game logic, audio engine
 js/app.test.js   — unit tests (Node.js, no dependencies)
 music/           — background music tracks (music1–6.mp3)
 ```
+
+## Game Modes
+
+A **Classic / Taiko** toggle sits in the top-left of the HUD. The default is **Classic**.
+
+| Mode | Description |
+|------|-------------|
+| **Classic** | Standard Minesweeper with rhythm scoring. No punishment mechanic. |
+| **Taiko** | Adds the punishment mechanic (see below). Switching to Taiko triggers a *Taikoooo !!!* / *たいこぉぉぉ！！！* banner. |
 
 ## Gameplay
 
@@ -53,24 +62,24 @@ The game starts at **Level 1** and advances automatically on each clear:
 2. The first click is always safe — mines are placed outside the 3×3 area around it.
 3. A revealed number shows how many of the eight neighboring cells contain mines.
 4. Zero-mine cells auto-flood-reveal connected empty cells and their numbered borders.
-5. Flag cells you suspect contain mines (right-click or long-press on desktop, 🚩 + tap on mobile).
+5. Flag cells you suspect contain mines (right-click or long-press on desktop).
 
 ## Controls
 
 | Action | Desktop | Mobile |
 |--------|---------|--------|
 | Reveal cell | Left-click | Tap |
-| Flag cell | Right-click / long-press | 🚩 + tap |
-| Toggle flag mode | — | 🚩 button |
+| Flag cell | Right-click / long-press | Right-click / long-press |
+| Switch game mode | Classic / Taiko toggle (top-left) | Classic / Taiko toggle (top-left) |
 | Menu (restart / sound / music) | ⋮ button | ⋮ button |
 
 ## HUD
 
-- **SCORE** — total score, animates up on every increment
-- **Mines ●** — `totalMines − flags − defused` remaining
-- **⏱ timer** — elapsed seconds
-- **Mini-run bar** — current DON/KATSU sequence challenge with 15-second countdown; Don-chan animates on the right
-- **Combo bar** — combo count, rhythm rank, energy bar, accumulated combo score
+- **Classic / Taiko toggle** — top-left; switches between game modes
+- **SCORE** — top-centre; total score, animates up on every increment
+- **⏱ timer** — top-right; elapsed seconds
+- **Mini-run bar** — DON/KATSU sequence challenge with 15-second countdown; Don-chan animates on the right
+- **Combo bar** — bottom strip: 💣 mine counter (left), combo count, rhythm rank, energy bar, combo score
 
 ## Scoring
 
@@ -101,8 +110,17 @@ Combo resets to 0 when the mini-run timer expires or when a wrong step is made.
 - The 15-second countdown starts on the first correct step.
 - **KATSU steps are capped to the number of unflagged mines remaining** — the sequence never asks you to flag more mines than exist.
 - Completing a sequence instantly generates the next one (longer if on a streak).
-- A wrong step or timer expiry resets the combo and regenerates the sequence.
+- **Any wrong action counts as a miss** — including the very first step of a sequence.
+- A miss or timer expiry resets the combo and regenerates the sequence.
 - Flagging a safe cell during a KATSU step counts the step but voids the run bonus.
+
+### Punishment (Taiko mode only)
+
+- Two consecutive mini-run misses (wrong action at any step, or timer expiry) trigger a punishment roll.
+- The roll has a **50% chance** of placing a new mine on the board.
+- When triggered: a random revealed cell is chosen, a mine is planted there, the surrounding **3×3 area is covered** (cells unrevealed and unflagged), and adjacent counts for all cells in the 5×5 area are recalculated.
+- A **Punished! / お仕置き！** banner and screen shake accompany the event.
+- The miss streak always resets after the roll, whether or not a mine was placed.
 
 ## 1UP Bonus
 

@@ -80,7 +80,8 @@ function buildMiniRun(len, maxKatsu) {
 }
 
 // Grid globals (mirror app.js)
-let rows, cols, grid, totalMines, revealedCount;
+let rows, cols, grid, totalMines, revealedCount, flagCount, defusedCount;
+let gameOver, firstClick;
 
 function makeGrid(r, c) {
   return Array.from({ length: r }, () =>
@@ -144,6 +145,7 @@ function revealBFS(r, c) {
 // Mini-run state (mirror app.js)
 let miniRun, miniRunStep, miniRunBonusEligible, miniRunCompletions;
 
+// advanceMiniRun mirrors app.js: every mismatch (including step 0) is an else branch
 function advanceMiniRun(actionId, isValidHit = true) {
   if (!miniRun || miniRunStep >= miniRun.length) return false;
   if (miniRun[miniRunStep].id === actionId) {
@@ -151,7 +153,7 @@ function advanceMiniRun(actionId, isValidHit = true) {
     miniRunStep++;
     if (miniRunStep >= miniRun.length) miniRunCompletions++;
     return true;
-  } else if (miniRunStep > 0) {
+  } else {
     miniRunStep = 0;
   }
   return false;
@@ -162,6 +164,64 @@ function setupMiniRun(sequence) {
   miniRunStep = 0;
   miniRunBonusEligible = true;
   miniRunCompletions   = 0;
+}
+
+// Game mode & punishment (mirror app.js)
+let gameMode, missedComboStreak;
+let _punishmentFired; // spy instead of DOM/audio side-effects
+
+function placePunishmentMine() {
+  if (gameOver || firstClick || !grid) return;
+
+  const revealed = [], hidden = [];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine)
+        (grid[r][c].revealed ? revealed : hidden).push([r, c]);
+
+  const pool = revealed.length ? revealed : hidden;
+  if (!pool.length) return;
+
+  const [mr, mc] = pool[Math.floor(Math.random() * pool.length)];
+
+  if (grid[mr][mc].revealed) { grid[mr][mc].revealed = false; revealedCount--; }
+  if (grid[mr][mc].flagged)  { grid[mr][mc].flagged  = false; flagCount--;     }
+
+  grid[mr][mc].mine     = true;
+  grid[mr][mc].adjacent = 0;
+  totalMines++;
+  _punishmentFired++;
+
+  // Recalculate adjacent counts for 5×5 area
+  for (let dr = -2; dr <= 2; dr++) {
+    for (let dc = -2; dc <= 2; dc++) {
+      const nr = mr + dr, nc = mc + dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      if (grid[nr][nc].mine) continue;
+      grid[nr][nc].adjacent = neighbors(nr, nc).filter(([r2, c2]) => grid[r2][c2].mine).length;
+    }
+  }
+
+  // Cover 3×3 area
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      const nr = mr + dr, nc = mc + dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      if (grid[nr][nc].mine) continue;
+      if (grid[nr][nc].revealed) { grid[nr][nc].revealed = false; revealedCount--; }
+      if (grid[nr][nc].flagged)  { grid[nr][nc].flagged  = false; flagCount--;     }
+    }
+  }
+}
+
+// recordMiniRunMiss mirrors app.js exactly (including 50% roll)
+function recordMiniRunMiss() {
+  if (gameMode !== 'taiko') return;
+  missedComboStreak++;
+  if (missedComboStreak >= 2) {
+    missedComboStreak = 0;
+    if (Math.random() < 0.5) placePunishmentMine();
+  }
 }
 
 // Win condition (extracted)
@@ -420,7 +480,7 @@ section('revealBFS');
 test('numbered cell reveals only itself', () => {
   rows = 3; cols = 3;
   grid = makeGrid(rows, cols);
-  grid[2][2].adjacent = 1; // not zero → no flood
+  grid[2][2].adjacent = 1;
   revealedCount = 0;
   const order = revealBFS(2, 2);
   assertEqual(order.length,   1);
@@ -486,7 +546,6 @@ test('single mine surrounded by zeros — mine not included in flood', () => {
   rows = 3; cols = 3;
   grid = makeGrid(rows, cols);
   grid[1][1].mine = true;
-  // set adjacents
   for (let r = 0; r < 3; r++)
     for (let c = 0; c < 3; c++)
       if (!grid[r][c].mine)
@@ -519,7 +578,7 @@ test('wrong step after progress resets to 0', () => {
   advanceMiniRun('katsu'); // wrong
   assertEqual(miniRunStep, 0);
 });
-test('wrong first step (step=0) does not reset', () => {
+test('wrong first step also resets to 0 (all mismatches reset)', () => {
   setupMiniRun(['don', 'don']);
   advanceMiniRun('katsu'); // wrong at step 0
   assertEqual(miniRunStep, 0);
@@ -531,6 +590,10 @@ test('returns true on match', () => {
 test('returns false on mismatch', () => {
   setupMiniRun(['don']);
   assertEqual(advanceMiniRun('katsu'), false);
+});
+test('returns false on mismatch at step 0', () => {
+  setupMiniRun(['katsu', 'don']);
+  assertEqual(advanceMiniRun('don'), false);
 });
 test('invalid katsu (non-mine flag) clears bonus eligibility', () => {
   setupMiniRun(['katsu', 'don']);
@@ -549,7 +612,7 @@ test('null miniRun always returns false', () => {
 });
 test('step past end of sequence returns false', () => {
   setupMiniRun(['don']);
-  advanceMiniRun('don'); // completes, step = 1 = length
+  advanceMiniRun('don');
   assertEqual(advanceMiniRun('don'), false);
 });
 test('three-step all-don sequence completes correctly', () => {
@@ -562,6 +625,235 @@ test('three-step all-don sequence completes correctly', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// recordMiniRunMiss — streak tracking & mode gating
+// ═══════════════════════════════════════════════════════════════════════════════
+section('recordMiniRunMiss — classic mode');
+
+test('classic mode: miss does not increment streak', () => {
+  gameMode = 'classic'; missedComboStreak = 0; _punishmentFired = 0;
+  recordMiniRunMiss();
+  assertEqual(missedComboStreak, 0);
+});
+test('classic mode: no punishment regardless of miss count', () => {
+  gameMode = 'classic'; missedComboStreak = 0; _punishmentFired = 0;
+  for (let i = 0; i < 10; i++) recordMiniRunMiss();
+  assertEqual(_punishmentFired, 0);
+});
+
+section('recordMiniRunMiss — taiko mode streak');
+
+test('taiko mode: first miss increments streak to 1', () => {
+  gameMode = 'taiko'; missedComboStreak = 0;
+  recordMiniRunMiss();
+  assertEqual(missedComboStreak, 1);
+});
+test('taiko mode: streak resets to 0 after reaching 2', () => {
+  gameMode = 'taiko'; missedComboStreak = 0;
+  recordMiniRunMiss();
+  recordMiniRunMiss(); // triggers punishment roll, resets streak
+  assertEqual(missedComboStreak, 0);
+});
+test('taiko mode: streak does not accumulate past 2 without reset', () => {
+  gameMode = 'taiko'; missedComboStreak = 0;
+  recordMiniRunMiss(); // 1
+  recordMiniRunMiss(); // 2 → reset to 0
+  recordMiniRunMiss(); // 1 again
+  assertEqual(missedComboStreak, 1);
+});
+test('taiko mode: punishment fires on every 2nd miss (stress — fires at least once in 100 pairs)', () => {
+  gameMode = 'taiko';
+  rows = 9; cols = 9; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[4][4].mine = true;
+  // Reveal all non-mine cells
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine) { grid[r][c].revealed = true; revealedCount++; }
+  _punishmentFired = 0;
+  for (let i = 0; i < 100; i++) {
+    missedComboStreak = 0;
+    recordMiniRunMiss();
+    recordMiniRunMiss();
+  }
+  assert(_punishmentFired > 0, 'punishment should fire at least once in 100 pairs');
+  assert(_punishmentFired < 100, 'punishment should not fire every time (50% chance)');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// placePunishmentMine
+// ═══════════════════════════════════════════════════════════════════════════════
+section('placePunishmentMine — preconditions');
+
+test('does nothing if gameOver', () => {
+  rows = 5; cols = 5; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = true; firstClick = false;
+  grid = makeGrid(rows, cols); _punishmentFired = 0;
+  placePunishmentMine();
+  assertEqual(_punishmentFired, 0);
+});
+test('does nothing if firstClick (mines not yet placed)', () => {
+  rows = 5; cols = 5; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = true;
+  grid = makeGrid(rows, cols); _punishmentFired = 0;
+  placePunishmentMine();
+  assertEqual(_punishmentFired, 0);
+});
+test('does nothing if all cells are already mines', () => {
+  rows = 2; cols = 2; totalMines = 4; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) grid[r][c].mine = true;
+  const before = totalMines; _punishmentFired = 0;
+  placePunishmentMine();
+  assertEqual(totalMines, before);
+  assertEqual(_punishmentFired, 0);
+});
+
+section('placePunishmentMine — mine placement');
+
+test('increases totalMines by 1', () => {
+  rows = 7; cols = 7; totalMines = 3; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[0][0].mine = true; grid[1][1].mine = true; grid[6][6].mine = true;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine) { grid[r][c].revealed = true; revealedCount++; }
+  placePunishmentMine();
+  assertEqual(totalMines, 4);
+});
+test('exactly one new mine cell appears', () => {
+  rows = 7; cols = 7; totalMines = 2; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[0][0].mine = true; grid[6][6].mine = true;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine) { grid[r][c].revealed = true; revealedCount++; }
+  const mineBefore = grid.flat().filter(c => c.mine).length;
+  placePunishmentMine();
+  assertEqual(grid.flat().filter(c => c.mine).length, mineBefore + 1);
+});
+test('prefers revealed cells for placement', () => {
+  // Board with some revealed and some hidden; punishment should land on revealed
+  rows = 5; cols = 5; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[4][4].mine = true;
+  // Reveal only center cell
+  grid[2][2].revealed = true; revealedCount = 1;
+  // All other non-mine cells remain hidden
+  for (let i = 0; i < 20; i++) {
+    rows = 5; cols = 5; totalMines = 1; revealedCount = 1;
+    flagCount = 0; grid = makeGrid(rows, cols);
+    grid[4][4].mine = true;
+    grid[2][2].revealed = true;
+    placePunishmentMine();
+    // The new mine must have been placed on a previously revealed cell
+    // (center 2,2 is the only revealed cell, so it must be the mine now)
+    assert(grid[2][2].mine, 'punishment mine should land on the only revealed cell');
+  }
+});
+
+section('placePunishmentMine — 3×3 cover');
+
+test('new mine cell is unrevealed after placement', () => {
+  rows = 5; cols = 5; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[0][0].mine = true;
+  grid[2][2].revealed = true; revealedCount = 1;
+  placePunishmentMine();
+  assert(grid[2][2].mine && !grid[2][2].revealed);
+});
+test('cells in 3×3 around new mine are not revealed', () => {
+  rows = 7; cols = 7; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[0][0].mine = true;
+  // Reveal all non-mine cells
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine) { grid[r][c].revealed = true; revealedCount++; }
+  placePunishmentMine();
+  // Find where the new mine landed
+  let mr = -1, mc = -1;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (grid[r][c].mine && !(r === 0 && c === 0)) { mr = r; mc = c; }
+  assert(mr !== -1, 'could not find punishment mine');
+  for (let dr = -1; dr <= 1; dr++)
+    for (let dc = -1; dc <= 1; dc++) {
+      const nr = mr + dr, nc = mc + dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      if (grid[nr][nc].mine) continue;
+      assert(!grid[nr][nc].revealed, `cell (${nr},${nc}) in 3×3 should be covered`);
+    }
+});
+test('revealedCount decreases when cells are covered', () => {
+  rows = 7; cols = 7; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[0][0].mine = true;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine) { grid[r][c].revealed = true; revealedCount++; }
+  const before = revealedCount;
+  placePunishmentMine();
+  assert(revealedCount < before, 'revealedCount should decrease after cover');
+});
+test('flagged cells in 3×3 are unflagged and flagCount decremented', () => {
+  rows = 7; cols = 7; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[0][0].mine = true;
+  // Flag and reveal all non-mine cells
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine) {
+        grid[r][c].revealed = true; revealedCount++;
+        grid[r][c].flagged  = true; flagCount++;
+      }
+  const flagsBefore = flagCount;
+  placePunishmentMine();
+  assert(flagCount < flagsBefore, 'flags in covered area should be cleared');
+  // No remaining cell should be both flagged and revealed=false from the cover (it was unflagged)
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      assert(!(grid[r][c].flagged && grid[r][c].mine), 'mine cell should not remain flagged');
+});
+
+section('placePunishmentMine — adjacency recalculation');
+
+test('adjacent counts are correct after punishment mine placed', () => {
+  rows = 7; cols = 7; totalMines = 1; revealedCount = 0;
+  flagCount = 0; defusedCount = 0; gameOver = false; firstClick = false;
+  grid = makeGrid(rows, cols);
+  grid[0][0].mine = true;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine) {
+        grid[r][c].revealed = true; revealedCount++;
+        grid[r][c].adjacent = neighbors(r, c).filter(([nr, nc]) => grid[nr][nc].mine).length;
+      }
+  placePunishmentMine();
+  // After placement, all non-mine cells in 5×5 around new mine should have correct adjacent counts
+  let mr = -1, mc = -1;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (grid[r][c].mine && !(r === 0 && c === 0)) { mr = r; mc = c; }
+  for (let dr = -2; dr <= 2; dr++)
+    for (let dc = -2; dc <= 2; dc++) {
+      const nr = mr + dr, nc = mc + dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      if (grid[nr][nc].mine) continue;
+      const expected = neighbors(nr, nc).filter(([r2, c2]) => grid[r2][c2].mine).length;
+      assertEqual(grid[nr][nc].adjacent, expected, `cell (${nr},${nc}) adjacent count wrong`);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Win condition
 // ═══════════════════════════════════════════════════════════════════════════════
 section('checkWin condition');
@@ -571,15 +863,15 @@ test('not won when no cells revealed', () => {
   assert(!checkWinCondition());
 });
 test('not won when one safe cell still hidden', () => {
-  rows = 3; cols = 3; totalMines = 1; revealedCount = 7; // 9-1=8 needed
+  rows = 3; cols = 3; totalMines = 1; revealedCount = 7;
   assert(!checkWinCondition());
 });
 test('won when all safe cells revealed', () => {
-  rows = 3; cols = 3; totalMines = 1; revealedCount = 8; // 9-1=8
+  rows = 3; cols = 3; totalMines = 1; revealedCount = 8;
   assert(checkWinCondition());
 });
 test('win condition = rows×cols − totalMines cells revealed', () => {
-  rows = 8; cols = 8; totalMines = 10; revealedCount = 54; // 64-10=54
+  rows = 8; cols = 8; totalMines = 10; revealedCount = 54;
   assert(checkWinCondition());
 });
 test('one short of win is not won', () => {

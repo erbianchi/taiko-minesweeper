@@ -212,22 +212,36 @@ h1 { display: none; }
   gap: 8px;
 }
 #hud-right { justify-content: flex-end; }
-.hud-mines, .hud-timer {
+.hud-timer {
   font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
   font-size: 0.95rem;
   color: rgba(255,255,255,0.8);
 }
-.hud-mines span, .hud-timer span { color: #ffd700; }
-#flag-mode-btn {
-  width: 28px; height: 28px;
-  border: none;
-  background: rgba(255,255,255,0.12);
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  display: flex; align-items: center; justify-content: center;
+.hud-timer span { color: #ffd700; }
+#mode-toggle {
+  display: flex;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.22);
 }
-#flag-mode-btn.active { background: var(--accent); color: var(--bg); }
+.mode-btn {
+  padding: 3px 9px;
+  font-size: clamp(0.6rem, 2vw, 0.72rem);
+  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.mode-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+}
 #controls-toggle {
   width: 28px; height: 28px;
   border: none;
@@ -531,17 +545,12 @@ h1 { display: none; }
   -webkit-overflow-scrolling: touch;
 }
 
-/* ── Flag-mode button active state ── */
-#flag-mode-btn.active {
-  background: var(--accent);
-  color: var(--bg);
-}
+
 
 /* ── Responsive ── */
 
 /* Fluid sizing via clamp (applies at all widths) */
 #total-score       { font-size: clamp(1.2rem, 5vw, 1.6rem); }
-.hud-mines,
 .hud-timer         { font-size: clamp(0.72rem, 3vw, 0.95rem); }
 .mr-step           { width: clamp(26px, 8vw, 38px); height: clamp(26px, 8vw, 38px); font-size: clamp(0.38rem, 1.4vw, 0.52rem); }
 
@@ -647,6 +656,21 @@ h1 { display: none; }
   min-height: 32px;
   flex-shrink: 0;
   overflow: hidden;
+  position: relative;
+}
+#bomb-counter {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+  font-size: clamp(0.78rem, 2.8vw, 1rem);
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  line-height: 1;
+}
+#bomb-counter span {
+  color: #ffd700;
 }
 #combo-count {
   font-weight: bold;

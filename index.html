@@ -261,8 +261,10 @@
   <div id="app">
     <div id="hud">
       <div id="hud-left">
-        <button id="flag-mode-btn" onclick="toggleFlagMode()" title="Flag mode">🚩</button>
-        <span class="hud-mines">● <span id="mines-left">0</span></span>
+        <div id="mode-toggle">
+          <button class="mode-btn active" id="mode-btn-classic" onclick="setGameMode('classic')">Classic</button>
+          <button class="mode-btn" id="mode-btn-taiko" onclick="setGameMode('taiko')">Taiko</button>
+        </div>
       </div>
       <div id="total-score-wrap">
         <span id="total-score-label">SCORE</span>
@@ -321,6 +323,7 @@
       <div id="board"></div>
     </div>
     <div id="combo-bar">
+      <span id="bomb-counter">💣 <span id="mines-left">0</span></span>
       <span id="combo-count">0 combo</span>
       <span class="rhythm-label" id="rhythm-label">–</span>
       <div id="energy-bar-wrap"><div id="energy-bar"></div></div>

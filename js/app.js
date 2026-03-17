@@ -25,6 +25,7 @@ let grid, cols, rows, totalMines, flagCount, revealedCount, gameOver, firstClick
 let timerInterval, seconds;
 let currentLevel = 1;
 let flagMode = false;
+let gameMode = 'classic'; // 'classic' | 'taiko'
 const MOUSE_LONG_PRESS_MS = 360;
 const MOUSE_LONG_PRESS_SUPPRESS_MS = 250;
 let mouseLongPressTimer = null;
@@ -48,6 +49,7 @@ const MINI_RUN_POOL = [
 ];
 let miniRun = null, miniRunStep = 0, miniRunTimer = null, miniRunSeconds = 0, miniRunCount = 0, defusedCount = 0;
 let miniRunBonusEligible = true;
+let missedComboStreak = 0;
 let extraLives = 0;
 
 function computeCellSize() {
@@ -216,11 +218,19 @@ function startMouseLongPress(event, r, c) {
   }, MOUSE_LONG_PRESS_MS);
 }
 
-function toggleFlagMode() {
-  flagMode = !flagMode;
-  const btn = document.getElementById('flag-mode-btn');
-  btn.classList.toggle('active', flagMode);
-  btn.title = flagMode ? 'Flag mode ON — tap to flag' : 'Flag mode OFF — tap to reveal';
+function setGameMode(mode) {
+  if (mode === gameMode) return;
+  gameMode = mode;
+  document.getElementById('mode-btn-classic').classList.toggle('active', mode === 'classic');
+  document.getElementById('mode-btn-taiko').classList.toggle('active', mode === 'taiko');
+  missedComboStreak = 0;
+  if (mode === 'taiko') {
+    tkTaikoBanner();
+    donAnim('hype');
+    playSound('beatdrop');
+    tkFlash('#ff9500');
+  }
+  startGame();
 }
 
 function toggleControls() {
@@ -238,6 +248,7 @@ function startMiniRunTimer() {
       clearInterval(miniRunTimer);
       miniRunStep = 0;
       breakCombo();
+      recordMiniRunMiss();
     }
   }, 1000);
 }
@@ -305,15 +316,84 @@ function advanceMiniRun(actionId, isValidHit = true) {
     updateMiniRunUI();
     if (miniRunStep >= miniRun.length) completeMiniRun();
     return true;
-  } else if (miniRunStep > 0) {
+  } else {
     miniRunStep = 0;
-    stopMiniRunTimer(); // abort timer on mistake
+    stopMiniRunTimer(); // abort timer on mistake (no-op if not running)
     updateMiniRunUI();
+    recordMiniRunMiss();
   }
   return false;
 }
 
+function recordMiniRunMiss() {
+  if (gameMode !== 'taiko') return;
+  missedComboStreak++;
+  if (missedComboStreak >= 2) {
+    missedComboStreak = 0;
+    if (Math.random() < 0.5) placePunishmentMine();
+  }
+}
+
+function placePunishmentMine() {
+  if (gameOver || firstClick || !grid) return;
+
+  // Prefer revealed non-mine cells so the cover-up is visible
+  const revealed = [], hidden = [];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (!grid[r][c].mine)
+        (grid[r][c].revealed ? revealed : hidden).push([r, c]);
+
+  const pool = revealed.length ? revealed : hidden;
+  if (!pool.length) return;
+
+  const [mr, mc] = pool[Math.floor(Math.random() * pool.length)];
+
+  // Unreveal / unflag the chosen cell before turning it into a mine
+  if (grid[mr][mc].revealed) { grid[mr][mc].revealed = false; revealedCount--; }
+  if (grid[mr][mc].flagged)  { grid[mr][mc].flagged  = false; flagCount--;     }
+
+  // Place the mine
+  grid[mr][mc].mine     = true;
+  grid[mr][mc].adjacent = 0;
+  totalMines++;
+
+  // Recalculate adjacent counts for the 3×3 cover + the ring of cells just
+  // outside it (5×5 area), so visible border cells show the correct number.
+  for (let dr = -2; dr <= 2; dr++) {
+    for (let dc = -2; dc <= 2; dc++) {
+      const nr = mr + dr, nc = mc + dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      if (grid[nr][nc].mine) continue;
+      grid[nr][nc].adjacent = neighbors(nr, nc).filter(([r2, c2]) => grid[r2][c2].mine).length;
+    }
+  }
+
+  // Cover the 3×3 area around the new mine (unreveal & unflag)
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      const nr = mr + dr, nc = mc + dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      if (grid[nr][nc].mine) continue;
+      if (grid[nr][nc].revealed) { grid[nr][nc].revealed = false; revealedCount--; }
+      if (grid[nr][nc].flagged)  { grid[nr][nc].flagged  = false; flagCount--;     }
+    }
+  }
+
+  document.getElementById('mines-left').textContent = totalMines - flagCount - defusedCount;
+  renderBoard();
+
+  const pos = getCellCenter(mr, mc);
+  tkRipple(pos.x, pos.y, '#ff2d55', 56);
+  tkPopup(pos.x, pos.y, '💣 +1!', '#ff2d55');
+  tkFlash('#660000');
+  tkScreenShake();
+  donAnim('scared');
+  setTimeout(() => tkPunishmentBanner(), 60);
+}
+
 function completeMiniRun() {
+  missedComboStreak = 0;
   miniRunCount++;
   stopMiniRunTimer();
   const bonus = miniRunBonusEligible ? miniRun.length * 50 * RHYTHM_LEVELS[rhythmLevel].mult : 0;
@@ -567,11 +647,9 @@ function startGame(level) {
 
   // reset flag mode
   flagMode = false;
-  const flagBtn = document.getElementById('flag-mode-btn');
-  flagBtn.classList.remove('active');
 
   // reset rhythm / score / mini-run
-  combo = 0; score = 0; comboScore = 0; rhythmLevel = 0; lastMilestone = 0; miniRunCount = 0; defusedCount = 0;
+  combo = 0; score = 0; comboScore = 0; rhythmLevel = 0; lastMilestone = 0; miniRunCount = 0; defusedCount = 0; missedComboStreak = 0;
   _scoreDisplay = 0;
   if (_scoreRAF) { cancelAnimationFrame(_scoreRAF); _scoreRAF = null; }
   const tsEl = document.getElementById('total-score');
@@ -949,6 +1027,46 @@ function tkPopup(x, y, text, color) {
     { transform:'translate(-50%,-38px) scale(1.1)', opacity:1, offset:0.65 },
     { transform:'translate(-50%,-70px) scale(0.8)', opacity:0 },
   ], { duration: 900, easing: 'ease-out' }).onfinish = () => el.remove();
+}
+
+function tkTaikoBanner() {
+  const el = document.createElement('div');
+  el.innerHTML = '<span style="font-size:2.2rem;display:block;letter-spacing:0.08em;">たいこぉぉぉ！！！</span>Taikoooo !!!';
+  el.style.cssText = `
+    position:fixed; left:50%; top:40%;
+    font-size:4.5rem; font-weight:900; text-align:center; line-height:1.1;
+    color:#ff9500;
+    text-shadow:4px 4px 0 #000,-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000;
+    pointer-events:none; z-index:9002; white-space:nowrap;
+    font-family:'Kosugi Maru','Arial Rounded MT Bold',sans-serif;
+  `;
+  document.body.appendChild(el);
+  el.animate([
+    { transform:'translate(-50%,-50%) scale(0.1) rotate(-15deg)', opacity:0 },
+    { transform:'translate(-50%,-50%) scale(1.25) rotate(4deg)',  opacity:1, offset:0.5 },
+    { transform:'translate(-50%,-50%) scale(1) rotate(0deg)',     opacity:1, offset:0.75 },
+    { transform:'translate(-50%,-50%) scale(2) rotate(0deg)',     opacity:0 },
+  ], { duration: 2200, easing: 'ease-out' }).onfinish = () => el.remove();
+}
+
+function tkPunishmentBanner() {
+  const el = document.createElement('div');
+  el.innerHTML = '<span style="font-size:2.2rem;display:block;letter-spacing:0.05em;">お仕置き！</span>Punished!';
+  el.style.cssText = `
+    position:fixed; left:50%; top:40%;
+    font-size:4.5rem; font-weight:900; text-align:center; line-height:1.1;
+    color:#ff2d55;
+    text-shadow:4px 4px 0 #000,-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000;
+    pointer-events:none; z-index:9002; white-space:nowrap;
+    font-family:'Kosugi Maru','Arial Rounded MT Bold',sans-serif;
+  `;
+  document.body.appendChild(el);
+  el.animate([
+    { transform:'translate(-50%,-50%) scale(0.1) rotate(-15deg)', opacity:0 },
+    { transform:'translate(-50%,-50%) scale(1.25) rotate(4deg)',  opacity:1, offset:0.5 },
+    { transform:'translate(-50%,-50%) scale(1) rotate(0deg)',     opacity:1, offset:0.75 },
+    { transform:'translate(-50%,-50%) scale(2) rotate(0deg)',     opacity:0 },
+  ], { duration: 2200, easing: 'ease-out' }).onfinish = () => el.remove();
 }
 
 function tkBanner(text) {
