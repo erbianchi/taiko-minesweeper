@@ -272,10 +272,10 @@ function shuffleMiniRun(steps) {
   return steps;
 }
 
-function buildMiniRun(len) {
+function buildMiniRun(len, maxKatsu) {
   const donStep = MINI_RUN_POOL.find(step => step.id === 'don');
   const katsuStep = MINI_RUN_POOL.find(step => step.id === 'katsu');
-  const katsuCount = Math.floor(len / 2);
+  const katsuCount = Math.min(Math.floor(len / 2), maxKatsu);
   const donCount = len - katsuCount;
 
   return shuffleMiniRun([
@@ -287,7 +287,8 @@ function buildMiniRun(len) {
 function generateMiniRun() {
   stopMiniRunTimer();
   const len = Math.min(2 + miniRunCount, 5);
-  miniRun = buildMiniRun(len);
+  const remainingBombs = Math.max(0, totalMines - flagCount - defusedCount);
+  miniRun = buildMiniRun(len, remainingBombs);
   miniRunStep = 0;
   miniRunBonusEligible = true;
   document.getElementById('mini-run-bar').classList.remove('complete');
