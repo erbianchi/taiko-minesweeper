@@ -1366,7 +1366,10 @@ function setBackgroundTrack(index) {
 
 function playNextTrack() {
   setBackgroundTrack(pickNextTrackIndex());
-  if (!musicMuted) bgMusic.play().catch(() => {});
+  if (!musicMuted) {
+    bgMusic.load();
+    bgMusic.play().catch(() => {});
+  }
 }
 
 bgMusic.addEventListener('ended', () => {
