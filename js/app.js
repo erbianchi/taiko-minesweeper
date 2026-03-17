@@ -89,8 +89,17 @@ function renderBonusTray() {
   const tray = document.getElementById('score-bonus-tray');
   if (!tray) return;
   tray.innerHTML = '';
-  for (let i = 0; i < extraLives; i++)
-    tray.appendChild(createBonusCard());
+  if (extraLives <= 0) return;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'bonus-card-wrapper';
+  wrapper.appendChild(createBonusCard());
+  if (extraLives > 1) {
+    const count = document.createElement('span');
+    count.className = 'bonus-card-count';
+    count.textContent = 'x' + extraLives;
+    wrapper.appendChild(count);
+  }
+  tray.appendChild(wrapper);
 }
 
 function clearFlyingBonusCards() {
@@ -562,7 +571,6 @@ function startGame(level) {
 
   // reset rhythm / score / mini-run
   combo = 0; score = 0; comboScore = 0; rhythmLevel = 0; lastMilestone = 0; miniRunCount = 0; defusedCount = 0;
-  extraLives = 0;
   _scoreDisplay = 0;
   if (_scoreRAF) { cancelAnimationFrame(_scoreRAF); _scoreRAF = null; }
   const tsEl = document.getElementById('total-score');
@@ -1367,13 +1375,26 @@ bgMusic.addEventListener('ended', () => {
 setBackgroundTrack(pickNextTrackIndex());
 
 function tryPlayMusic() {
-  if (!musicMuted) bgMusic.play().catch(() => {});
+  if (musicMuted) {
+    removeMusicUnlockListeners();
+    return;
+  }
+  bgMusic.play().then(() => {
+    removeMusicUnlockListeners();
+  }).catch(() => {
+    // keep listeners alive so the next interaction retries
+  });
+}
+
+function removeMusicUnlockListeners() {
   document.removeEventListener('click',       tryPlayMusic);
+  document.removeEventListener('touchstart',  tryPlayMusic);
   document.removeEventListener('contextmenu', tryPlayMusic);
 }
 
 // Browsers block autoplay until the user interacts with the page
 document.addEventListener('click',       tryPlayMusic);
+document.addEventListener('touchstart',  tryPlayMusic);
 document.addEventListener('contextmenu', tryPlayMusic);
 
 function toggleMusic() {

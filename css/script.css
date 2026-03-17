@@ -339,6 +339,21 @@ h1 { display: none; }
 .bonus-card.life-card .bonus-card-main {
   letter-spacing: 0.04em;
 }
+.bonus-card-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+.bonus-card-count {
+  font-family: 'Fredoka One', 'Kosugi Maru', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 1px 1px 0 #8b5e00, -1px -1px 0 #8b5e00;
+  line-height: 1;
+  margin-left: 2px;
+  margin-bottom: 3px;
+}
 .bonus-fly-card {
   position: fixed;
   left: 0;
