@@ -1,6 +1,6 @@
 # たいこ地雷 — Taiko Minesweeper
 
-A browser-based Minesweeper game with a Taiko no Tatsujin-inspired presentation: Don-chan animations, taiko drum sounds, rhythm combos, and progressive level system.
+A browser-based Minesweeper game with a Taiko no Tatsujin-inspired presentation: Don-chan animations, taiko drum sounds, rhythm combos, and progressive level system. The game is available at : https://taiko-minesweeper.com/
 
 ## Running
 
