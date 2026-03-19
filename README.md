@@ -1,5 +1,7 @@
 # たいこ地雷 — Taiko Minesweeper
 
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=erbianchi_taiko-minesweeper)](https://sonarcloud.io/summary/new_code?id=erbianchi_taiko-minesweeper)
+
 A browser-based Minesweeper game with a Taiko no Tatsujin-inspired presentation: Don-chan animations, taiko drum sounds, rhythm combos, and progressive level system. The game is available at : https://taiko-minesweeper.com/
 
 ## Running
