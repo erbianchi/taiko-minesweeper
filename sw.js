@@ -11,6 +11,8 @@ const ASSETS = [
   '/music/music4.mp3',
   '/music/music5.mp3',
   '/music/music6.mp3',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
 ];
 
 self.addEventListener('install', e => {
